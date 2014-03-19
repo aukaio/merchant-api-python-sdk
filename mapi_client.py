@@ -1,7 +1,7 @@
 from requests import Request, Session
-import time
 import json
 from validation import validate_input
+import logging
 
 
 class mAPIClient(object):
@@ -12,17 +12,15 @@ class mAPIClient(object):
 
     def __init__(self,
                  auth,
-                 callback_client,
                  base_url='https://mcashtestbed.appspot.com/merchant/v1',
                  mcash_merchant='',
                  mcash_user='',
-                 additional_headers={}
+                 additional_headers={},
+                 logger=None
                  ):
+        self.logger = logger or logging.getLogger(__name__)
         # exit flag
-        self.should_run = True
         self.base_url = base_url
-        # take the callback client
-        self.callback_client = callback_client
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
         # Start a new session
@@ -37,16 +35,6 @@ class mAPIClient(object):
         self.session.headers.update(user_info_headers)
         self.session.headers.update(additional_headers)
 
-    def start(self):
-        self.callback_client.start()
-        while self.should_run:
-            time.sleep(1)
-            print("outer loop")
-
-    def stop(self):
-        self.callback_client.stop()
-        self.should_run = False
-
     def do_req(self, method, url, args=None):
         """Used internally to send a request to the API, left public
         so it can be used to talk to the API more directly.
@@ -59,19 +47,10 @@ class mAPIClient(object):
             req = Request(method,
                           url=url)
 
-        return self.session.send(self.session.prepare_request(req))
-
-    def bind(self, event_name, callable):
-        """Bind a received pusher event to a callable
-
-        Arguments:
-            event_name: name of the event to bind
-            callable:   callable to bind the event to
-        """
-        try:
-            self.callback_client.bind(event_name, callable)
-        except:
-            raise
+        resp = self.session.send(self.session.prepare_request(req))
+        if resp.status_code / 100 is not 2:
+            resp.raise_for_status()
+        return resp
 
     def _depaginate(self, url):
         """GETs the url provided and traverses the 'next' url that's
@@ -97,25 +76,32 @@ class mAPIClient(object):
     def create(self, endpoint, **kwargs):
         """Create an entity at endpoint.
         """
-        return self.do_req('POST', self.base_url + '/' + endpoint + '/', kwargs)
+        return self.do_req('POST',
+                           self.base_url + '/' + endpoint + '/',
+                           kwargs)
 
     @validate_input
-    def update(self, endpoint, id, **kwargs):
+    def update(self, endpoint, _id, **kwargs):
         """Update the entity with id at endpoint
         """
-        return self.do_req('PUT', self.base_url + '/' + endpoint + '/' + id + '/', kwargs)
+        return self.do_req('PUT',
+                           self.base_url + '/' + endpoint + '/' + _id + '/',
+                           kwargs)
 
-    def get(self, endpoint, id=None):
-        """Get the entity with id from endpoint
+    def get(self, endpoint, _id=None):
+        """Get the entity with _id from endpoint or all entities if _id is None
         """
-        if id is None:
-            resp = self._depaginate(self.base_url + '/' + endpoint + '/')
-            return resp
+        if _id is None:
+            data = self._depaginate(self.base_url + '/' + endpoint + '/')
         else:
-            resp = self.do_req('GET', self.base_url + '/' + endpoint + '/' + id + '/')
-            return json.loads(resp.text)
+            data = self.do_req('GET',
+                               self.base_url
+                               + '/' + endpoint
+                               + '/' + _id + '/').text
+        return data
 
-    def delete(self, endpoint, id):
+    def delete(self, endpoint, _id):
         """Delete the entity with id at endpoint
         """
-        return self.do_req('DELETE', self.base_url + '/' + endpoint + '/' + id + '/')
+        return self.do_req('DELETE',
+                           self.base_url + '/' + endpoint + '/' + _id + '/')
