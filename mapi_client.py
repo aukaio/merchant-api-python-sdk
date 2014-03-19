@@ -2,6 +2,7 @@ from requests import Request, Session
 import json
 from validation import validate_input
 import logging
+import traceback
 
 
 class mAPIClient(object):
@@ -49,7 +50,10 @@ class mAPIClient(object):
 
         resp = self.session.send(self.session.prepare_request(req))
         if resp.status_code / 100 is not 2:
-            resp.raise_for_status()
+            try:
+                resp.raise_for_status()
+            except:
+                traceback.print_stack()
         return resp
 
     def _depaginate(self, url):
