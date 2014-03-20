@@ -50,10 +50,12 @@ class mAPIClient(object):
 
         resp = self.session.send(self.session.prepare_request(req))
         if resp.status_code / 100 is not 2:
-            try:
+            try:  # wrapped in a try so we can catch and print a stacktrace
                 resp.raise_for_status()
-            except:
-                traceback.print_stack()
+            except:  # need to join lines together here
+                msg = ''.join('' + l for l in traceback.format_stack())
+                self.logger.error(msg)
+                raise
         return resp
 
     def _depaginate(self, url):
