@@ -140,7 +140,7 @@ class mAPIClient(object):
     def create_user(self, **kwargs):
         """Create user for the Merchant given in the X-Mcash-Merchant header.
         """
-        return self.do_req('POST', self.base_url + '/user/').json()
+        return self.do_req('POST', self.base_url + '/user/', kwargs).json()
 
     @validate_input
     def update_user(self, user_id, **kwargs):

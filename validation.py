@@ -16,7 +16,7 @@ def validate_input(function):
     return wrapper
 
 create_user_validator = Schema({
-    Required('user_id'): str,
+    Required('id'): str,
     'roles': [Any('user', 'superuser')],
     'netmask': str,
     'secret': All(str, Length(min=8, max=64)),
