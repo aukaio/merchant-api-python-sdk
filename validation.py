@@ -1,5 +1,4 @@
 from functools import wraps
-from apimodels.url import URL
 from voluptuous import Schema, Required, Any, All, Length, Range
 
 
@@ -8,8 +7,7 @@ def validate_input(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
-            endpoint = args[1]
-            name = function.__name__ + '_' + endpoint + '_validator'
+            name = function.__name__ + '_validator'
             globals()[name](kwargs)
             return function(*args, **kwargs)
         except KeyError:
@@ -17,28 +15,37 @@ def validate_input(function):
                             " function " + function.__name__)
     return wrapper
 
-create_shortlink_validator = Schema({
-    'callback_uri': str,
-    'description': str,
-    'serial_number': str
-})
-
-update_shortlink_validator = Schema({
-    'callback_uri': str,
-    'description': str
-})
-
 create_user_validator = Schema({
-    Required('id'): str,
+    Required('user_id'): str,
     'roles': [Any('user', 'superuser')],
     'netmask': str,
     'secret': All(str, Length(min=8, max=64)),
     'pubkey': str
 })
 
+update_user_validator = Schema({
+    'roles': [Any('user', 'superuser')],
+    'netmask': str,
+    'secret': All(str, Length(min=8, max=64)),
+    'pubkey': str
+})
+
+create_pos_validator = Schema({
+    Required('name'): str,
+    Required('type'): str,
+    Required('id'): str,
+    'location': str,
+})
+
+update_pos_validator = Schema({
+    Required('name'): str,
+    Required('type'): str,
+    'location': str,
+})
+
 create_payment_request_validator = Schema({
     'ledger': str,
-    'display_message_uri': URL,
+    'display_message_uri': str,
     'callback_uri': str,
     Required('customer'): All(str, Length(max=100)),
     Required('currency'): All(str, Length(min=3, max=3)),
@@ -53,22 +60,38 @@ create_payment_request_validator = Schema({
     'expires_in': All(int, Range(min=0, max=2592000)),
 })
 
-create_point_of_sale_validator = Schema({
-    Required('name'): str,
-    Required('type'): str,
-    Required('id'): str,
-    'location': str,
-})
-
 update_payment_request_validator = Schema({
     'ledger': str,
-    'display_message_uri': URL,
+    'display_message_uri': str,
     'callback_uri': str,
     'currency': All(str, Length(min=3, max=3)),
     'amount': str,
     'additional_amount': All(float, Range(min=0)),
     'capture_id': str,
     'action': Any('auth', 'sale', 'AUTH', 'SALE'),
+})
+
+update_ticket_validator = Schema({
+    'tickets': list,
+})
+
+create_shortlink_validator = Schema({
+    'callback_uri': str,
+    'description': str,
+    'serial_number': str
+})
+
+update_shortlink_validator = Schema({
+    'callback_uri': str,
+    'description': str
+})
+
+update_ledger_validator = Schema({
+    'description': str
+})
+
+close_report_validator = Schema({
+    'callback_uri': str,
 })
 
 create_permission_request_validator = Schema({
