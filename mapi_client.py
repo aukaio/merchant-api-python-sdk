@@ -161,7 +161,7 @@ class mAPIClient(object):
         """
         return self.do_req('GET',
                            self.base_url + '/user/'
-                           + user_id + '/', kwargs).json()
+                           + user_id + '/').json()
 
     @validate_input
     def create_pos(self, **kwargs):
@@ -213,7 +213,8 @@ class mAPIClient(object):
         Arguments:
             tid -- Transaction id assigned by mCASH
         """
-        return self.do_req('POST', self.base_url + '/payment_request/', kwargs).json()
+        return self.do_req('POST', self.base_url + '/payment_request/',
+                           kwargs).json()
 
     @validate_input
     def update_payment_request(self, tid, **kwargs):
@@ -282,7 +283,8 @@ class mAPIClient(object):
     def create_shortlink(self, **kwargs):
         """Register new shortlink
         """
-        return self.do_req('POST', self.base_url + '/shortlink/', kwargs).json()
+        return self.do_req('POST', self.base_url + '/shortlink/',
+                           kwargs).json()
 
     def get_all_shortlinks(self):
         """List shortlink registrations
@@ -448,7 +450,8 @@ class mAPIClient(object):
         pos_tid twice, only one Permission request is created.
         """
         return self.do_req('POST',
-                           self.base_url + '/permission_request/', kwargs).json()
+                           self.base_url + '/permission_request/',
+                           kwargs).json()
 
     def get_permission_request(self, rid):
         """See permission request info
