@@ -140,7 +140,7 @@ class mAPIClient(object):
     def create_user(self, **kwargs):
         """Create user for the Merchant given in the X-Mcash-Merchant header.
         """
-        return self.do_req('POST', self.base_url + '/user/').json()
+        return self.do_req('POST', self.base_url + '/user/', kwargs).json()
 
     @validate_input
     def update_user(self, user_id, **kwargs):
@@ -151,7 +151,7 @@ class mAPIClient(object):
         """
         return self.do_req('PUT',
                            self.base_url + '/user/'
-                           + user_id + '/').json()
+                           + user_id + '/', kwargs).json()
 
     def get_user(self, user_id):
         """Get user info
@@ -161,13 +161,13 @@ class mAPIClient(object):
         """
         return self.do_req('GET',
                            self.base_url + '/user/'
-                           + user_id + '/').json()
+                           + user_id + '/', kwargs).json()
 
     @validate_input
     def create_pos(self, **kwargs):
         """Create POS resource
         """
-        return self.do_req('POST', self.base_url + '/pos/').json()
+        return self.do_req('POST', self.base_url + '/pos/', kwargs).json()
 
     def get_all_pos(self):
         """List all Point of Sales for merchant
@@ -175,7 +175,7 @@ class mAPIClient(object):
         return self._depaginate(self.base_url + '/pos/')
 
     @validate_input
-    def update_pos(self, pos_id):
+    def update_pos(self, pos_id, **kwargs):
         """Update POS resource
 
         Arguments:
@@ -183,7 +183,7 @@ class mAPIClient(object):
         """
         return self.do_req('PUT',
                            self.base_url + '/pos/'
-                           + pos_id + '/').json()
+                           + pos_id + '/', kwargs).json()
 
     def delete_pos(self, pos_id):
         """Delete POS
@@ -206,17 +206,17 @@ class mAPIClient(object):
                            + pos_id + '/').json()
 
     @validate_input
-    def create_payment_request(self):
+    def create_payment_request(self, **kwargs):
         """Post payment request. The call is idempotent; that is, if one posts
         the same pos_id and pos_tid twice, only one payment request is created.
 
         Arguments:
             tid -- Transaction id assigned by mCASH
         """
-        return self.do_req('POST', self.base_url + '/payment_request/').json()
+        return self.do_req('POST', self.base_url + '/payment_request/', kwargs).json()
 
     @validate_input
-    def update_payment_request(self, tid):
+    def update_payment_request(self, tid, **kwargs):
         """Update payment request, reauthorize, capture, release or abort
 
         It is possible to update ledger and the callback URIs for a payment
@@ -238,7 +238,7 @@ class mAPIClient(object):
         """
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
-                           + tid + '/').json()
+                           + tid + '/', kwargs).json()
 
     def get_payment_request(self, tid):
         """Retrieve payment request info
@@ -261,7 +261,7 @@ class mAPIClient(object):
                            + tid + '/outcome/').json()
 
     @validate_input
-    def update_ticket(self, tid):
+    def update_ticket(self, tid, **kwargs):
         """If the customer should be granted an electronic ticket as a result
         of a successful payment, the merchant may (at any time) PUT ticket
         information to this endpoint. There is an ordered list of tickets; the
@@ -276,13 +276,13 @@ class mAPIClient(object):
         """
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
-                           + tid + '/ticket/').json()
+                           + tid + '/ticket/', kwargs).json()
 
     @validate_input
-    def create_shortlink(self):
+    def create_shortlink(self, **kwargs):
         """Register new shortlink
         """
-        return self.do_req('POST', self.base_url + '/shortlink/').json()
+        return self.do_req('POST', self.base_url + '/shortlink/', kwargs).json()
 
     def get_all_shortlinks(self):
         """List shortlink registrations
@@ -290,7 +290,7 @@ class mAPIClient(object):
         return self._depaginate(self.base_url + '/shortlink/')
 
     @validate_input
-    def update_shortlink(self, shortlink_id):
+    def update_shortlink(self, shortlink_id, **kwargs):
         """Update existing shortlink registration
 
         Arguments:
@@ -298,7 +298,7 @@ class mAPIClient(object):
         """
         return self.do_req('PUT',
                            self.base_url + '/shortlink/'
-                           + shortlink_id + '/').json()
+                           + shortlink_id + '/', kwargs).json()
 
     def delete_shortlink(self, shortlink_id):
         """Delete shortlink
@@ -332,7 +332,7 @@ class mAPIClient(object):
         return self._depaginate(self.base_url + '/ledger/')
 
     @validate_input
-    def update_ledger(self, ledger_id):
+    def update_ledger(self, ledger_id, **kwargs):
         """Update ledger info
 
         Arguments:
@@ -340,7 +340,7 @@ class mAPIClient(object):
         """
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
-                           + ledger_id + '/').json()
+                           + ledger_id + '/', kwargs).json()
 
     def disable_ledger(self, ledger_id):
         """Disable ledger. It will still be used for payments that are
@@ -374,7 +374,7 @@ class mAPIClient(object):
                                 + ledger_id + '/report/')
 
     @validate_input
-    def close_report(self, ledger_id, report_id):
+    def close_report(self, ledger_id, report_id, **kwargs):
         u"""Close Report
 
         When you PUT to a report, it will start the process of closing it. When
@@ -396,7 +396,7 @@ class mAPIClient(object):
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
                            + ledger_id + '/report/'
-                           + report_id + '/').json()
+                           + report_id + '/', kwargs).json()
 
     def get_report(self, ledger_id, report_id):
         """Get report info
@@ -441,14 +441,14 @@ class mAPIClient(object):
                            + settlement_id + '/').json()
 
     @validate_input
-    def create_permission_request(self):
+    def create_permission_request(self, **kwargs):
         """Create permission request
 
         The call is idempotent; that is, if one posts the same pos_id and
         pos_tid twice, only one Permission request is created.
         """
         return self.do_req('POST',
-                           self.base_url + '/permission_request/').json()
+                           self.base_url + '/permission_request/', kwargs).json()
 
     def get_permission_request(self, rid):
         """See permission request info
