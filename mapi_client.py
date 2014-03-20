@@ -78,6 +78,31 @@ class mAPIClient(object):
             items += new_items
         return items
 
+    def _get_parameters(self, only=None, exclude=None, ignore='self'):
+        """Returns a dictionary of the calling functions
+        parameter names and values.
+
+        Arguments:
+            only -- use this to only return parameters from this list of names.
+            exclude -- use this to return every parameter *except* those
+                       included in this list of names.
+            ignore -- use this inside methods to ignore the calling object's
+                      name. For convenience, it ignores 'self' by default.
+        """
+        import inspect
+        args, varargs, varkw, defaults = \
+            inspect.getargvalues(inspect.stack()[1][0])
+        if only is None:
+            only = args[:]
+            if varkw:
+                only.extend(defaults[varkw].keys())
+                defaults.update(defaults[varkw])
+        if exclude is None:
+            exclude = []
+        exclude.append(ignore)
+        return dict([(attrname, defaults[attrname])
+                     for attrname in only if attrname not in exclude])
+
     def create(self, endpoint, **kwargs):
         """Create an entity at endpoint.
         """
@@ -136,22 +161,28 @@ class mAPIClient(object):
                            self.base_url + '/merchant_lookup/'
                            + lookup_id + '/').json()
 
-    @validate_input
-    def create_user(self, **kwargs):
+    def create_user(self, id,
+                    roles=None, netmask=None,
+                    secret=None, pubkey=None):
         """Create user for the Merchant given in the X-Mcash-Merchant header.
         """
-        return self.do_req('POST', self.base_url + '/user/', kwargs).json()
+        arguments = self._get_parameters()
+        from pprint import pprint
+        pprint(arguments)
+        return self.do_req('POST', self.base_url + '/user/', arguments).json()
 
-    @validate_input
-    def update_user(self, user_id, **kwargs):
-        """Update user
+    def update_user(self, user_id,
+                    roles=None, netmask=None,
+                    secret=None, pubkey=None):
+        """Update user. Returns the raw response object.
 
         Arguments:
             user_id -- User id of user to update
         """
+        arguments = self._get_parameters(exclude=["user_id"])
         return self.do_req('PUT',
                            self.base_url + '/user/'
-                           + user_id + '/', kwargs).json()
+                           + user_id + '/', arguments)
 
     def get_user(self, user_id):
         """Get user info
@@ -163,27 +194,28 @@ class mAPIClient(object):
                            self.base_url + '/user/'
                            + user_id + '/').json()
 
-    @validate_input
-    def create_pos(self, **kwargs):
+    def create_pos(self, name, type,
+                   id, location=None):
         """Create POS resource
         """
-        return self.do_req('POST', self.base_url + '/pos/', kwargs).json()
+        arguments = self._get_parameters()
+        return self.do_req('POST', self.base_url + '/pos/', arguments).json()
 
     def get_all_pos(self):
         """List all Point of Sales for merchant
         """
         return self._depaginate(self.base_url + '/pos/')
 
-    @validate_input
-    def update_pos(self, pos_id, **kwargs):
-        """Update POS resource
+    def update_pos(self, pos_id, name, type, location=None):
+        """Update POS resource. Returns the raw response object.
 
         Arguments:
             pos_id -- POS id as chosen on registration
         """
+        arguments = self._get_parameters(exclude=["pos_id"])
         return self.do_req('PUT',
                            self.base_url + '/pos/'
-                           + pos_id + '/', kwargs).json()
+                           + pos_id + '/', arguments)
 
     def delete_pos(self, pos_id):
         """Delete POS
