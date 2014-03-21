@@ -78,37 +78,33 @@ class mAPIClient(object):
             items += new_items
         return items
 
-    def create(self, endpoint, **kwargs):
-        """Create an entity at endpoint.
-        """
-        return self.do_req('POST',
-                           self.base_url + '/' + endpoint + '/',
-                           kwargs)
+    def _get_parameters(self, only=None, exclude=None, ignore='self'):
+        """Returns a dictionary of the calling functions
+        parameter names and values.
 
-    def update(self, endpoint, _id, **kwargs):
-        """Update the entity with id at endpoint
+        Arguments:
+            only:
+                use this to only return parameters from this list of names.
+            exclude:
+                use this to return every parameter *except* those included in
+                this list of names.
+            ignore:
+                use this inside methods to ignore the calling object's name.
+                For convenience, it ignores 'self' by default.
         """
-        return self.do_req('PUT',
-                           self.base_url + '/' + endpoint + '/' + _id + '/',
-                           kwargs)
-
-    def get(self, endpoint, _id=None):
-        """Get the entity with _id from endpoint or all entities if _id is None
-        """
-        if _id is None:
-            data = self._depaginate(self.base_url + '/' + endpoint + '/')
-        else:
-            data = self.do_req('GET',
-                               self.base_url
-                               + '/' + endpoint
-                               + '/' + _id + '/').text
-        return data
-
-    def delete(self, endpoint, _id):
-        """Delete the entity with id at endpoint
-        """
-        return self.do_req('DELETE',
-                           self.base_url + '/' + endpoint + '/' + _id + '/')
+        import inspect
+        args, varargs, varkw, defaults = \
+            inspect.getargvalues(inspect.stack()[1][0])
+        if only is None:
+            only = args[:]
+            if varkw:
+                only.extend(defaults[varkw].keys())
+                defaults.update(defaults[varkw])
+        if exclude is None:
+            exclude = []
+        exclude.append(ignore)
+        return dict([(attrname, defaults[attrname])
+                     for attrname in only if attrname not in exclude])
 
     def get_merchant(self, merchant_id):
         """Endpoint for retrieving info about merchants
@@ -120,7 +116,8 @@ class mAPIClient(object):
         Service Portal).
 
         Arguments:
-            merchant_id -- Merchant id assigned by mCASH
+            merchant_id:
+                Merchant id assigned by mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/merchant/'
@@ -137,37 +134,82 @@ class mAPIClient(object):
                            + lookup_id + '/').json()
 
     @validate_input
-    def create_user(self, **kwargs):
-        """Create user for the Merchant given in the X-Mcash-Merchant header.
-        """
-        return self.do_req('POST', self.base_url + '/user/', kwargs).json()
-
-    @validate_input
-    def update_user(self, user_id, **kwargs):
-        """Update user
+    def create_user(self, user_id,
+                    roles=None, netmask=None,
+                    secret=None, pubkey=None):
+        u"""Create user for the Merchant given in the X-Mcash-Merchant header.
 
         Arguments:
-            user_id -- User id of user to update
+            user_id:
+                Identifier for the user
+            roles:
+                Role
+            netmask:
+                Limit user connections by netmask, for example 192.168.1.0/24
+            secret:
+                Secret used when authenticating with mCASH
+            pubkey:
+                RSA key used for authenticating by signing
         """
+        arguments = self._get_parameters()
+        arguments['id'] = arguments.pop('user_id')  # server expects id
+        return self.do_req('POST', self.base_url + '/user/', arguments).json()
+
+    @validate_input
+    def update_user(self, user_id,
+                    roles=None, netmask=None,
+                    secret=None, pubkey=None):
+        """Update user. Returns the raw response object.
+
+        Arguments:
+            user_id:
+                User id of user to update
+            roles:
+                Role
+            netmask:
+                Limit user connections by netmask, for example 192.168.1.0/24
+            secret:
+                Secret used when authenticating with mCASH
+            pubkey:
+                RSA key used for authenticating by signing
+        """
+        arguments = self._get_parameters(exclude=["user_id"])
         return self.do_req('PUT',
                            self.base_url + '/user/'
-                           + user_id + '/', kwargs).json()
+                           + user_id + '/', arguments)
 
     def get_user(self, user_id):
         """Get user info
 
         Arguments:
-            user_id -- User id of user to update
+            user_id:
+                User id of user to update
         """
         return self.do_req('GET',
                            self.base_url + '/user/'
                            + user_id + '/').json()
 
     @validate_input
-    def create_pos(self, **kwargs):
+    def create_pos(self, name, pos_type,
+                   pos_id, location=None):
         """Create POS resource
+
+        Arguments:
+            name:
+                Human-readable name of the POS, used for displaying payment
+                request origin to end user
+            pos_type:
+                POS type
+            location:
+                Merchant location
+            pos_id:
+                The ID of the POS that is to be created. Has to be unique for
+                the merchant
         """
-        return self.do_req('POST', self.base_url + '/pos/', kwargs).json()
+        arguments = self._get_parameters()
+        arguments['id'] = arguments.pop('pos_id')  # server expects 'id'
+        arguments['type'] = arguments.pop('pos_type')  # server expects 'type'
+        return self.do_req('POST', self.base_url + '/pos/', arguments).json()
 
     def get_all_pos(self):
         """List all Point of Sales for merchant
@@ -175,21 +217,32 @@ class mAPIClient(object):
         return self._depaginate(self.base_url + '/pos/')
 
     @validate_input
-    def update_pos(self, pos_id, **kwargs):
-        """Update POS resource
+    def update_pos(self, pos_id, name, pos_type, location=None):
+        """Update POS resource. Returns the raw response object.
 
         Arguments:
-            pos_id -- POS id as chosen on registration
+            pos_id:
+                POS id as chosen on registration
+            name:
+                Human-readable name of the POS, used for displaying payment
+                request origin to end user
+            pos_type:
+                POS type
+            location:
+                Merchant location
         """
+        arguments = self._get_parameters(exclude=["pos_id"])
+        arguments['type'] = arguments.pop('pos_type')  # server expects 'type'
         return self.do_req('PUT',
                            self.base_url + '/pos/'
-                           + pos_id + '/', kwargs).json()
+                           + pos_id + '/', arguments)
 
     def delete_pos(self, pos_id):
         """Delete POS
 
         Arguments:
-            pos_id -- POS id as chosen on registration
+            pos_id:
+                POS id as chosen on registration
         """
         return self.do_req('DELETE',
                            self.base_url + '/pos/'
@@ -206,18 +259,65 @@ class mAPIClient(object):
                            + pos_id + '/').json()
 
     @validate_input
-    def create_payment_request(self, **kwargs):
+    def create_payment_request(self, customer, currency, amount, allow_credit,
+                               pos_id, pos_tid, action, ledger=None,
+                               display_message_uri=None, callback_uri=None,
+                               additional_amount=None, additional_edit=None,
+                               text=None, expires_in=None):
         """Post payment request. The call is idempotent; that is, if one posts
         the same pos_id and pos_tid twice, only one payment request is created.
 
         Arguments:
-            tid -- Transaction id assigned by mCASH
+            ledger:
+                Log entries will be added to the open report on the specified
+                ledger
+            display_message_uri:
+                Messages that can be used to inform the POS operator about the
+                progress of the payment request will be POSTed to this URI if
+                provided
+            callback_uri:
+                If provided, mCASH will POST to this URI when the status of the
+                payment request changes, using the message mechanism described
+                in the introduction. The data in the "object" part of the
+                message is the same as what can be retrieved by calling GET on
+                the "/payment_request/<tid>/outcome/" resource URI.
+            customer:
+                Customer identifiers include msisdn, scan token or access token
+            currency:
+                3 chars https://en.wikipedia.org/wiki/ISO_4217
+            amount:
+                The base amount of the payment
+            additional_amount:
+                Typically cash withdrawal or gratuity
+            additional_edit:
+                Whether user is allowed to additional amount for gratuity or
+                similar
+            allow_credit:
+                Whether to allow credit payment for this payment request.
+                Credit incurs interchange
+            pos_id:
+                The POS this payment request originates from, used for
+                informing user about origin
+            pos_tid:
+                Local transaction id for POS. This must be unique for the POS
+            text:
+                Text that is shown to user when asked to pay. This can contain
+                linebreaks and the text has tofit on smartphones screens.
+            action:
+                Action to perform, the main difference is what it looks like in
+                App UI.
+            expires_in:
+                Expiration in seconds from when server received request
         """
+        arguments = self._get_parameters()
         return self.do_req('POST', self.base_url + '/payment_request/',
-                           kwargs).json()
+                           arguments).json()
 
     @validate_input
-    def update_payment_request(self, tid, **kwargs):
+    def update_payment_request(self, tid, currency=None, amount=None,
+                               action=None, ledger=None, callback_uri=None,
+                               display_message_uri=None,
+                               additional_amount=None,):
         """Update payment request, reauthorize, capture, release or abort
 
         It is possible to update ledger and the callback URIs for a payment
@@ -235,17 +335,47 @@ class mAPIClient(object):
         capture is performed.
 
         Arguments:
-            tid -- Transaction id assigned by mCASH
+            ledger:
+                Log entries will be added to the open report on the specified
+                ledger
+            display_message_uri:
+                Messages that can be used to inform the POS operator about the
+                progress of the payment request will be POSTed to this URI if
+                provided
+            callback_uri:
+                If provided, mCASH will POST to this URI when the status of the
+                payment request changes, using the message mechanism described
+                in the introduction. The data in the "object" part of the
+                message is the same as what can be retrieved by calling GET on
+                the "/payment_request/<tid>/outcome/" resource URI.
+            customer:
+                Customer identifiers include msisdn, scan token or access token
+            currency:
+                3 chars https://en.wikipedia.org/wiki/ISO_4217
+            amount:
+                The base amount of the payment
+            additional_amount:
+                Typically cash withdrawal or gratuity
+            capture_id:
+                Local id for capture. Must be set if amount is set, otherwise
+                capture_id must be unset.
+            tid:
+                Transaction id assigned by mCASH
+            action:
+                Action to perform, the main difference is what it looks like in
+                App UI.
         """
+        arguments = self._get_parameters(exclude=['tid'])
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
-                           + tid + '/', kwargs).json()
+                           + tid + '/', arguments).json()
 
     def get_payment_request(self, tid):
         """Retrieve payment request info
 
         Arguments:
-            tid -- Transaction id assigned by mCASH
+            tid:
+                Transaction id assigned by mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/payment_request/'
@@ -255,14 +385,15 @@ class mAPIClient(object):
         """Retrieve payment request outcome
 
         Arguments:
-            tid -- Transaction id assigned by mCASH
+            tid:
+                Transaction id assigned by mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/payment_request/'
                            + tid + '/outcome/').json()
 
     @validate_input
-    def update_ticket(self, tid, **kwargs):
+    def update_ticket(self, tid, tickets=None):
         """If the customer should be granted an electronic ticket as a result
         of a successful payment, the merchant may (at any time) PUT ticket
         information to this endpoint. There is an ordered list of tickets; the
@@ -274,17 +405,33 @@ class mAPIClient(object):
         that is displayed to the customer, however we will add QR code,
         barcodes etc. soon.  Please contact mCASH about supporting your
         barcode.
+
+        Arguments:
+            tickets:
+                List of tickets to grant customer
         """
+        arguments = self._get_parameters(exclude=['tid'])
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
-                           + tid + '/ticket/', kwargs).json()
+                           + tid + '/ticket/', arguments).json()
 
     @validate_input
-    def create_shortlink(self, **kwargs):
+    def create_shortlink(self, callback_uri=None,
+                         description=None, serial_number=None):
         """Register new shortlink
+
+        Arguments:
+            callback_uri:
+                URI called by mCASH when user scans shortlink
+            description:
+                Shortlink description displayed in confirmation dialogs
+            serial_number:
+                Serial number on printed QR codes. This field is only used when
+                registering printed stickers issued by mCASH
         """
+        arguments = self._get_parameters()
         return self.do_req('POST', self.base_url + '/shortlink/',
-                           kwargs).json()
+                           arguments).json()
 
     def get_all_shortlinks(self):
         """List shortlink registrations
@@ -292,21 +439,25 @@ class mAPIClient(object):
         return self._depaginate(self.base_url + '/shortlink/')
 
     @validate_input
-    def update_shortlink(self, shortlink_id, **kwargs):
+    def update_shortlink(self, shortlink_id, callback_uri=None,
+                         description=None):
         """Update existing shortlink registration
 
         Arguments:
-            shortlink_id -- Shortlink id assigned by mCASH
+            shortlink_id:
+                Shortlink id assigned by mCASH
         """
+        arguments = self._get_parameters(exclude=['shortlink_id'])
         return self.do_req('PUT',
                            self.base_url + '/shortlink/'
-                           + shortlink_id + '/', kwargs).json()
+                           + shortlink_id + '/', arguments).json()
 
     def delete_shortlink(self, shortlink_id):
         """Delete shortlink
 
         Arguments:
-            shortlink_id -- Shortlink id assigned by mCASH
+            shortlink_id:
+                Shortlink id assigned by mCASH
         """
         return self.do_req('DELETE',
                            self.base_url + '/shortlink/'
@@ -316,7 +467,8 @@ class mAPIClient(object):
         """Retrieve registered shortlink info
 
         Arguments:
-            shortlink_id -- Shortlink id assigned by mCASH
+            shortlink_id:
+                Shortlink id assigned by mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/shortlink/'
@@ -334,15 +486,19 @@ class mAPIClient(object):
         return self._depaginate(self.base_url + '/ledger/')
 
     @validate_input
-    def update_ledger(self, ledger_id, **kwargs):
+    def update_ledger(self, ledger_id, description=None):
         """Update ledger info
 
         Arguments:
-            ledger_id -- Ledger id assigned by mCASH
+            ledger_id:
+                Ledger id assigned by mCASH
+            description:
+                Description of the Ledger and it's usage
         """
+        arguments = self._get_parameters(exclude=['ledger_id'])
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
-                           + ledger_id + '/', kwargs).json()
+                           + ledger_id + '/', arguments).json()
 
     def disable_ledger(self, ledger_id):
         """Disable ledger. It will still be used for payments that are
@@ -350,7 +506,8 @@ class mAPIClient(object):
         payments with the ledger.
 
         Arguments:
-            ledger_id -- Ledger id assigned by mCASH
+            ledger_id:
+                Ledger id assigned by mCASH
         """
         return self.do_req('DELETE',
                            self.base_url + '/ledger/'
@@ -360,7 +517,8 @@ class mAPIClient(object):
         """Get ledger info
 
         Arguments:
-            ledger_id -- Ledger id assigned by mCASH
+            ledger_id:
+                Ledger id assigned by mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/ledger/'
@@ -370,13 +528,14 @@ class mAPIClient(object):
         """List reports on given ledger
 
         Arguments:
-            ledger_id -- Ledger id assigned by mCASH
+            ledger_id:
+                Ledger id assigned by mCASH
         """
         return self._depaginate(self.base_url + '/ledger/'
                                 + ledger_id + '/report/')
 
     @validate_input
-    def close_report(self, ledger_id, report_id, **kwargs):
+    def close_report(self, ledger_id, report_id, callback_uri=None):
         u"""Close Report
 
         When you PUT to a report, it will start the process of closing it. When
@@ -392,20 +551,27 @@ class mAPIClient(object):
         in callback.
 
         Arguments:
-            ledger_id -- Id for ledger for report
-            report_id -- Report id assigned by mCASH
+            ledger_id:
+                Id for ledger for report
+            report_id:
+                Report id assigned by mCASH
+            callback_uri:
+                Callback URI to be called when Report has finished closing.
         """
+        arguments = self._get_parameters(exclude=['ledger_id', 'report_id'])
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
                            + ledger_id + '/report/'
-                           + report_id + '/', kwargs).json()
+                           + report_id + '/', arguments).json()
 
     def get_report(self, ledger_id, report_id):
         """Get report info
 
         Arguments:
-            ledger_id -- Id for ledger for report
-            report_id -- Report id assigned by mCASH
+            ledger_id:
+                Id for ledger for report
+            report_id:
+                Report id assigned by mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/ledger/'
@@ -436,28 +602,33 @@ class mAPIClient(object):
         will be transferred to the next settlement, or billed by mCASH.
 
         Parameters:
-            settlement_id -- The ID of the settlement to retrieve.
+            settlement_id:
+                The ID of the settlement to retrieve.
         """
         return self.do_req('GET',
                            self.base_url + '/settlement/'
                            + settlement_id + '/').json()
 
     @validate_input
-    def create_permission_request(self, **kwargs):
+    def create_permission_request(self, customer, pos_id, pos_tid, scope,
+                                  ledger=None, text=None, callback_uri=None,
+                                  expires_in=None):
         """Create permission request
 
         The call is idempotent; that is, if one posts the same pos_id and
         pos_tid twice, only one Permission request is created.
         """
+        arguments = self._get_parameters()
         return self.do_req('POST',
                            self.base_url + '/permission_request/',
-                           kwargs).json()
+                           arguments).json()
 
     def get_permission_request(self, rid):
         """See permission request info
 
         Arguments:
-            rid -- Permission request id assigned my mCASH
+            rid:
+                Permission request id assigned my mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/permission_request/'
@@ -467,7 +638,8 @@ class mAPIClient(object):
         """See outcome of permission request
 
         Arguments:
-            rid -- Permission request id assigned my mCASH
+            rid:
+                Permission request id assigned my mCASH
         """
         return self.do_req('GET',
                            self.base_url + '/permission_request/'

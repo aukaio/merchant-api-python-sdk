@@ -7,8 +7,8 @@ def validate_input(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
-            name = function.__name__ + '_validator'
-            globals()[name](kwargs)
+            name = function.__name__ + '_validator'  # find validator name
+            globals()[name](kwargs)  # call validation function
             return function(*args, **kwargs)
         except KeyError:
             raise Exception("Could not find validation schema for the"
@@ -16,7 +16,7 @@ def validate_input(function):
     return wrapper
 
 create_user_validator = Schema({
-    Required('id'): str,
+    Required('user_id'): str,
     'roles': [Any('user', 'superuser')],
     'netmask': str,
     'secret': All(str, Length(min=8, max=64)),
@@ -24,6 +24,7 @@ create_user_validator = Schema({
 })
 
 update_user_validator = Schema({
+    Required('user_id'): str,
     'roles': [Any('user', 'superuser')],
     'netmask': str,
     'secret': All(str, Length(min=8, max=64)),
@@ -32,14 +33,15 @@ update_user_validator = Schema({
 
 create_pos_validator = Schema({
     Required('name'): str,
-    Required('type'): str,
-    Required('id'): str,
+    Required('pos_type'): str,
+    Required('pos_id'): str,
     'location': str,
 })
 
 update_pos_validator = Schema({
+    Required('pos_id'): str,
     Required('name'): str,
-    Required('type'): str,
+    Required('pos_type'): str,
     'location': str,
 })
 
@@ -61,6 +63,7 @@ create_payment_request_validator = Schema({
 })
 
 update_payment_request_validator = Schema({
+    Required('tid'): str,
     'ledger': str,
     'display_message_uri': str,
     'callback_uri': str,
@@ -72,6 +75,7 @@ update_payment_request_validator = Schema({
 })
 
 update_ticket_validator = Schema({
+    Required('tid'): str,
     'tickets': list,
 })
 
@@ -82,15 +86,19 @@ create_shortlink_validator = Schema({
 })
 
 update_shortlink_validator = Schema({
+    Required('shortlink_id'): str,
     'callback_uri': str,
     'description': str
 })
 
 update_ledger_validator = Schema({
+    Required('ledger_id'): str,
     'description': str
 })
 
 close_report_validator = Schema({
+    Required('ledger_id'): str,
+    Required('report_id'): str,
     'callback_uri': str,
 })
 
