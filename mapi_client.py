@@ -40,13 +40,11 @@ class mAPIClient(object):
         """Used internally to send a request to the API, left public
         so it can be used to talk to the API more directly.
         """
-        if args is not None:
-            req = Request(method,
-                          url=url,
-                          data=json.dumps(args))
-        else:
-            req = Request(method,
-                          url=url)
+        if args:  # if args is passed dump it to json
+            args = json.dumps(args)
+        req = Request(method,
+                      url=url,
+                      data=args)
 
         resp = self.session.send(self.session.prepare_request(req))
         if resp.status_code / 100 is not 2:
@@ -58,25 +56,20 @@ class mAPIClient(object):
                 raise
         return resp
 
-    def _depaginate(self, url):
-        """GETs the url provided and traverses the 'next' url that's
-        returned while storing the data in a list.
+    def _depaginate(self, url, _items=[]):
+        """GETs the url provided and traverses the 'next' url that's returned
+        while storing the data in a list.
+
+        Arguments:
+            url:
+                the url to depaginate
         """
-        resp = self.do_req('GET', url)
-        data = json.loads(resp.text)
-        next_url = data['next']
-        del data['next']
-        del data['prev']
-        key, items = data.popitem()
+        data = self.do_req('GET', url).json()
+        next_url = data.pop('next')
+        _items += data.pop('uris')
         while next_url is not None:
-            resp = self.do_req('GET', next_url)
-            data = json.loads(resp.text)
-            next_url = data['next']
-            del data['next']
-            del data['prev']
-            key, new_items = data.popitem()
-            items += new_items
-        return items
+            self._depaginate(next_url, _items)
+        return _items
 
     def _get_parameters(self, only=None, exclude=None, ignore='self'):
         """Returns a dictionary of the calling functions
