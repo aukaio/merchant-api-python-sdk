@@ -53,8 +53,13 @@ class mAPIClient(object):
             except:  # need to join lines from tb together here
                 msg = ''.join('' + l for l in traceback.format_stack())
                 self.logger.error(msg)
+                self.logger.error(resp.text)
                 raise
         return resp
+
+    def _get_page(self, url):
+        data = self.do_req('GET', url).json()
+        return data
 
     def _depaginate(self, url, _items=[]):
         """GETs the url provided and traverses the 'next' url that's returned
@@ -67,7 +72,7 @@ class mAPIClient(object):
         data = self.do_req('GET', url).json()
         next_url = data.pop('next')
         _items += data.pop('uris')
-        while next_url is not None:
+        if next_url is not None:
             self._depaginate(next_url, _items)
         return _items
 
@@ -239,7 +244,7 @@ class mAPIClient(object):
         """
         return self.do_req('DELETE',
                            self.base_url + '/pos/'
-                           + pos_id + '/').json()
+                           + pos_id + '/')
 
     def get_pos(self, pos_id):
         """Retrieve POS info
@@ -361,7 +366,7 @@ class mAPIClient(object):
         arguments = self._get_parameters(exclude=['tid'])
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
-                           + tid + '/', arguments).json()
+                           + tid + '/', arguments)
 
     def get_payment_request(self, tid):
         """Retrieve payment request info
@@ -406,7 +411,7 @@ class mAPIClient(object):
         arguments = self._get_parameters(exclude=['tid'])
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
-                           + tid + '/ticket/', arguments).json()
+                           + tid + '/ticket/', arguments)
 
     @validate_input
     def create_shortlink(self, callback_uri=None,
@@ -425,6 +430,15 @@ class mAPIClient(object):
         arguments = self._get_parameters()
         return self.do_req('POST', self.base_url + '/shortlink/',
                            arguments).json()
+
+    def get_shortlinks(self):
+        """List shortlink registrations
+        """
+        data = self._get_page(self.base_url + '/shortlink/')
+        next_url = data['next']
+        prev_url = data['prev']
+        uris = data['uris']
+        return uris, next_url, prev_url
 
     def get_all_shortlinks(self):
         """List shortlink registrations
@@ -456,7 +470,7 @@ class mAPIClient(object):
                            self.base_url + '/shortlink/'
                            + shortlink_id + '/').json()
 
-    def get_shortlinks(self, shortlink_id):
+    def get_shortlink(self, shortlink_id):
         """Retrieve registered shortlink info
 
         Arguments:
@@ -467,11 +481,13 @@ class mAPIClient(object):
                            self.base_url + '/shortlink/'
                            + shortlink_id + '/').json()
 
-    def create_ledger(self):
+    @validate_input
+    def create_ledger(self, currency, description=None):
         """Create a ledger
         """
+        arguments = self._get_parameters()
         return self.do_req('POST',
-                           self.base_url + '/ledger/').json()
+                           self.base_url + '/ledger/', arguments).json()
 
     def get_all_ledgers(self):
         """List available ledgers
@@ -491,7 +507,7 @@ class mAPIClient(object):
         arguments = self._get_parameters(exclude=['ledger_id'])
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
-                           + ledger_id + '/', arguments).json()
+                           + ledger_id + '/', arguments)
 
     def disable_ledger(self, ledger_id):
         """Disable ledger. It will still be used for payments that are
@@ -504,7 +520,7 @@ class mAPIClient(object):
         """
         return self.do_req('DELETE',
                            self.base_url + '/ledger/'
-                           + ledger_id + '/').json()
+                           + ledger_id + '/')
 
     def get_ledger(self, ledger_id):
         """Get ledger info
