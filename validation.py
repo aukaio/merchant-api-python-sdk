@@ -35,14 +35,16 @@ create_pos_validator = Schema({
     Required('name'): str,
     Required('pos_type'): str,
     Required('pos_id'): str,
-    'location': str,
+    'location': {'latitude': float,
+                 'longitude': float,
+                 'accuracy': float}
 })
 
 update_pos_validator = Schema({
     Required('pos_id'): str,
     Required('name'): str,
     Required('pos_type'): str,
-    'location': str,
+    'location': {},
 })
 
 create_payment_request_validator = Schema({
@@ -59,7 +61,7 @@ create_payment_request_validator = Schema({
     Required('pos_tid'): str,
     'text': str,
     Required('action'): Any('auth', 'sale', 'AUTH', 'SALE'),
-    'expires_in': All(int, Range(min=0, max=2592000)),
+    Required('expires_in'): All(int, Range(min=0, max=2592000)),
 })
 
 update_payment_request_validator = Schema({
@@ -71,7 +73,8 @@ update_payment_request_validator = Schema({
     'amount': str,
     'additional_amount': All(float, Range(min=0)),
     'capture_id': str,
-    'action': Any('auth', 'sale', 'AUTH', 'SALE'),
+    'action': Any('reauth', 'capture', 'abort', 'release',
+                  'REAUTH', 'CAPTURE', 'ABORT', 'RELEASE'),
 })
 
 update_ticket_validator = Schema({
@@ -88,6 +91,11 @@ create_shortlink_validator = Schema({
 update_shortlink_validator = Schema({
     Required('shortlink_id'): str,
     'callback_uri': str,
+    'description': str
+})
+
+create_ledger_validator = Schema({
+    Required('currency'): str,
     'description': str
 })
 

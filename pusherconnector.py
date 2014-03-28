@@ -18,7 +18,6 @@ class PusherConnector(object):
         """
         self.logger = logger or logging.getLogger(__name__)
         self.pusher_connected_listeners = []
-        self.quitflag = False
         self.pos_callback_chan = callback_chan
         self.pusher = pusherclient.Pusher(pusher_api_key)
         self.pusher.connection.logger.setLevel(logging.WARNING)
