@@ -57,24 +57,24 @@ class mAPIClient(object):
                 raise
         return resp
 
-    def _get_page(self, url):
+    def _depagination_generator(self, url):
         data = self.do_req('GET', url).json()
-        return data
+        yield data['uris']
 
-    def _depaginate(self, url, _items=[]):
-        """GETs the url provided and traverses the 'next' url that's returned
-        while storing the data in a list.
+        next_link = data.pop('next')
+        while next_link is not None:
+            data = self.do_req('GET', next_link).json()
+            next_link = data.pop('next')
+            yield data['uris']
 
-        Arguments:
-            url:
-                the url to depaginate
+    def _depaginate_all(self, url):
+        """GETs the url provided and traverses the 'next' url that's
+        returned while storing the data in a list.
         """
-        data = self.do_req('GET', url).json()
-        next_url = data.pop('next')
-        _items += data.pop('uris')
-        if next_url is not None:
-            self._depaginate(next_url, _items)
-        return _items
+        items = []
+        for x in self._depagination_generator(url):
+            items += x
+        return items
 
     def _get_parameters(self, only=None, exclude=None, ignore='self'):
         """Returns a dictionary of the calling functions
@@ -102,7 +102,8 @@ class mAPIClient(object):
             exclude = []
         exclude.append(ignore)
         return dict([(attrname, defaults[attrname])
-                     for attrname in only if attrname not in exclude])
+                     for attrname in only if attrname not in exclude
+                     if defaults[attrname] is not None])
 
     def get_merchant(self, merchant_id):
         """Endpoint for retrieving info about merchants
@@ -212,7 +213,7 @@ class mAPIClient(object):
     def get_all_pos(self):
         """List all Point of Sales for merchant
         """
-        return self._depaginate(self.base_url + '/pos/')
+        return self._depaginate_all(self.base_url + '/pos/')
 
     @validate_input
     def update_pos(self, pos_id, name, pos_type, location=None):
@@ -314,7 +315,7 @@ class mAPIClient(object):
     @validate_input
     def update_payment_request(self, tid, currency=None, amount=None,
                                action=None, ledger=None, callback_uri=None,
-                               display_message_uri=None,
+                               display_message_uri=None, capture_id=None,
                                additional_amount=None,):
         """Update payment request, reauthorize, capture, release or abort
 
@@ -431,19 +432,16 @@ class mAPIClient(object):
         return self.do_req('POST', self.base_url + '/shortlink/',
                            arguments).json()
 
-    def get_shortlinks(self):
+    def get_shortlink_generator(self):
         """List shortlink registrations
         """
-        data = self._get_page(self.base_url + '/shortlink/')
-        next_url = data['next']
-        prev_url = data['prev']
-        uris = data['uris']
-        return uris, next_url, prev_url
+        depaginator = self._depagination_generator(self.base_url + '/shortlink/')
+        return depaginator
 
     def get_all_shortlinks(self):
         """List shortlink registrations
         """
-        return self._depaginate(self.base_url + '/shortlink/')
+        return self._depaginate_all(self.base_url + '/shortlink/')
 
     @validate_input
     def update_shortlink(self, shortlink_id, callback_uri=None,
@@ -492,7 +490,7 @@ class mAPIClient(object):
     def get_all_ledgers(self):
         """List available ledgers
         """
-        return self._depaginate(self.base_url + '/ledger/')
+        return self._depaginate_all(self.base_url + '/ledger/')
 
     @validate_input
     def update_ledger(self, ledger_id, description=None):
@@ -540,8 +538,8 @@ class mAPIClient(object):
             ledger_id:
                 Ledger id assigned by mCASH
         """
-        return self._depaginate(self.base_url + '/ledger/'
-                                + ledger_id + '/report/')
+        return self._depaginate_all(self.base_url + '/ledger/'
+                                    + ledger_id + '/report/')
 
     @validate_input
     def close_report(self, ledger_id, report_id, callback_uri=None):
@@ -600,7 +598,7 @@ class mAPIClient(object):
     def get_all_settlements(self):
         """List settlements
         """
-        return self._depaginate(self.base_url + '/settlement/')
+        return self._depaginate_all(self.base_url + '/settlement/')
 
     def get_settlement(self, settlement_id):
         """Retrieve information regarding one settlement. The settlement
@@ -657,7 +655,7 @@ class mAPIClient(object):
     def get_all_status_codes(self):
         """Get all status codes
         """
-        return self._depaginate(self.base_url + '/status_code/')
+        return self._depaginate_all(self.base_url + '/status_code/')
 
     def get_status_code(self, value):
         """Get status code

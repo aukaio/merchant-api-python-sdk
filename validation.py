@@ -61,7 +61,7 @@ create_payment_request_validator = Schema({
     Required('pos_tid'): str,
     'text': str,
     Required('action'): Any('auth', 'sale', 'AUTH', 'SALE'),
-    'expires_in': All(int, Range(min=0, max=2592000)),
+    Required('expires_in'): All(int, Range(min=0, max=2592000)),
 })
 
 update_payment_request_validator = Schema({
