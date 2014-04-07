@@ -14,7 +14,7 @@ class TestmAPIClient(object):
         self.mapiclient = mAPIClient(
             # RSA encryption is preferred
             auth=RSA_SHA256Auth('tests/testkey'),
-            mcash_merchant='tes',   # The merchant id we use
+            mcash_merchant='testmerchant',   # The merchant id we use
             mcash_user='admin',             # The user to use for our merchant
             additional_headers={
                 'X-Testbed-Token':          # mcash testbed needs a token
@@ -105,11 +105,11 @@ class TestmAPIClient(object):
             action="auth",
             expires_in=3600,
             # ledger='testledger',
-            display_message_uri="http://example.com/yolo",
+            display_message_uri="http://example.com/examplemessage",
             callback_uri="pusher:m-testchannel",
             additional_amount=21.00,
             additional_edit=True,
-            text="yolothisisatext")
+            text="Descriptional test")
 
     def test_update_payment_request(self):
         _lid = str(self.test_create_ledger()['id'])
@@ -117,9 +117,9 @@ class TestmAPIClient(object):
         self.mapiclient.update_payment_request(
             tid=_pid,
             action="abort",
-            ledger=_lid,  # TODOFIXMEYOLO create ledger first
+            ledger=_lid,  # TODOFIXME create ledger first
             callback_uri="pusher:m-testchannel",
-            display_message_uri="http://example.com/yolo")
+            display_message_uri="http://example.com/examplemessage")
 
     def test_get_payment_request(self):
         _id = str(self.test_create_payment_request()['id'])
@@ -134,8 +134,9 @@ class TestmAPIClient(object):
         self.mapiclient.update_ticket(tid=_id)
 
     def test_create_shortlink(self):
-        return self.mapiclient.create_shortlink(callback_uri="pusher:m-yolo",
-                                                description="swagsterlink")
+        return self.mapiclient.create_shortlink(
+            callback_uri="pusher:m-testmerchant-testchannel",
+            description="swagsterlink")
 
     def test_get_shortlink(self):
         _id = str(self.test_create_shortlink()['id'])
@@ -166,9 +167,10 @@ class TestmAPIClient(object):
 #    def test_close_report(self):
 #        _lid = str(self.test_create_ledger()['id'])
 #        _rid = str(self.test_get_all_reports())
-#        self.mapiclient.close_report(ledger_id=_lid,
-#                                     report_id=_rid,
-#                                     callback_uri="pusher:m-yolo")
+#        self.mapiclient.close_report(
+#           ledger_id=_lid,
+#           report_id=_rid,
+#           callback_uri="pusher:m-testmerchant-testchannel")
 
 #    def test_get_report(self):
 #        pass
@@ -207,7 +209,8 @@ class TestmAPIClient(object):
                 pos_id="test_pos_id",
                 pos_tid=_tid,
                 expires_in=2592000,
-                scope="openid address profile phone email fodselsnummer")['id'])
+                scope="openid address profile phone email fodselsnummer")['id']
+            )
         except HTTPError as e:
             code = e.response.status_code
             assert code == 409
@@ -221,7 +224,8 @@ class TestmAPIClient(object):
                 pos_id="test_pos_id",
                 pos_tid=_tid,
                 expires_in=2592000,
-                scope="openid address profile phone email fodselsnummer")['id'])
+                scope="openid address profile phone email fodselsnummer")['id']
+            )
         except HTTPError as e:
             code = e.response.status_code
             assert code == 409

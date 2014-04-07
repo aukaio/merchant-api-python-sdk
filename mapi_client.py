@@ -69,7 +69,8 @@ class mAPIClient(object):
 
     def _depaginate_all(self, url):
         """GETs the url provided and traverses the 'next' url that's
-        returned while storing the data in a list.
+        returned while storing the data in a list. Returns a single list of all
+        items.
         """
         items = []
         for x in self._depagination_generator(url):
@@ -435,7 +436,8 @@ class mAPIClient(object):
     def get_shortlink_generator(self):
         """List shortlink registrations
         """
-        depaginator = self._depagination_generator(self.base_url + '/shortlink/')
+        depaginator = self._depagination_generator(self.base_url +
+                                                   '/shortlink/')
         return depaginator
 
     def get_all_shortlinks(self):
@@ -455,7 +457,7 @@ class mAPIClient(object):
         arguments = self._get_parameters(exclude=['shortlink_id'])
         return self.do_req('PUT',
                            self.base_url + '/shortlink/'
-                           + shortlink_id + '/', arguments).json()
+                           + shortlink_id + '/', arguments)
 
     def delete_shortlink(self, shortlink_id):
         """Delete shortlink
