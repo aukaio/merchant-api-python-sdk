@@ -44,7 +44,9 @@ update_pos_validator = Schema({
     Required('pos_id'): str,
     Required('name'): str,
     Required('pos_type'): str,
-    'location': {},
+    'location': {'latitude': float,
+                 'longitude': float,
+                 'accuracy': float}
 })
 
 create_payment_request_validator = Schema({

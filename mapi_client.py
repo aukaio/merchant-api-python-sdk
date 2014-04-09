@@ -20,7 +20,6 @@ class mAPIClient(object):
                  logger=None
                  ):
         self.logger = logger or logging.getLogger(__name__)
-        # exit flag
         self.base_url = base_url
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
@@ -302,7 +301,7 @@ class mAPIClient(object):
                 Local transaction id for POS. This must be unique for the POS
             text:
                 Text that is shown to user when asked to pay. This can contain
-                linebreaks and the text has tofit on smartphones screens.
+                linebreaks and the text has to fit on smartphones screens.
             action:
                 Action to perform, the main difference is what it looks like in
                 App UI.
