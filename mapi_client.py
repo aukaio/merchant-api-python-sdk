@@ -20,7 +20,6 @@ class mAPIClient(object):
                  logger=None
                  ):
         self.logger = logger or logging.getLogger(__name__)
-        # exit flag
         self.base_url = base_url
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
@@ -69,7 +68,8 @@ class mAPIClient(object):
 
     def _depaginate_all(self, url):
         """GETs the url provided and traverses the 'next' url that's
-        returned while storing the data in a list.
+        returned while storing the data in a list. Returns a single list of all
+        items.
         """
         items = []
         for x in self._depagination_generator(url):
@@ -301,7 +301,7 @@ class mAPIClient(object):
                 Local transaction id for POS. This must be unique for the POS
             text:
                 Text that is shown to user when asked to pay. This can contain
-                linebreaks and the text has tofit on smartphones screens.
+                linebreaks and the text has to fit on smartphones screens.
             action:
                 Action to perform, the main difference is what it looks like in
                 App UI.
@@ -435,7 +435,8 @@ class mAPIClient(object):
     def get_shortlink_generator(self):
         """List shortlink registrations
         """
-        depaginator = self._depagination_generator(self.base_url + '/shortlink/')
+        depaginator = self._depagination_generator(self.base_url +
+                                                   '/shortlink/')
         return depaginator
 
     def get_all_shortlinks(self):
@@ -455,7 +456,7 @@ class mAPIClient(object):
         arguments = self._get_parameters(exclude=['shortlink_id'])
         return self.do_req('PUT',
                            self.base_url + '/shortlink/'
-                           + shortlink_id + '/', arguments).json()
+                           + shortlink_id + '/', arguments)
 
     def delete_shortlink(self, shortlink_id):
         """Delete shortlink
