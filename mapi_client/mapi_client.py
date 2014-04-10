@@ -5,7 +5,7 @@ import logging
 import traceback
 
 
-class mAPIClient(object):
+class MapiThinClient(object):
     _default_headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
         'Content-Type': 'application/json',
@@ -251,7 +251,8 @@ class mAPIClient(object):
         """Retrieve POS info
 
         Arguments:
-            pos_id -- POS id as chosen on registration
+            pos_id:
+                POS id as chosen on registration
         """
         return self.do_req('GET',
                            self.base_url + '/pos/'
@@ -570,7 +571,7 @@ class mAPIClient(object):
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
                            + ledger_id + '/report/'
-                           + report_id + '/', arguments).json()
+                           + report_id + '/', arguments)
 
     def get_report(self, ledger_id, report_id):
         """Get report info
