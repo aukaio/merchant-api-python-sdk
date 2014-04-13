@@ -28,7 +28,7 @@ class SecretAuth(AuthBase):
         return r
 
 
-class RSA_SHA256Auth(AuthBase):
+class RsaSha256Auth(AuthBase):
 
     """Attaches RSA authentication to the given Request object."""
 

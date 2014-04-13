@@ -5,7 +5,7 @@ import logging
 import traceback
 
 
-class MapiThinClient(object):
+class MapiClient(object):
     _default_headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
         'Content-Type': 'application/json',

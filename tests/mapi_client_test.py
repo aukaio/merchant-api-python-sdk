@@ -2,13 +2,13 @@ from requests import HTTPError
 from random import choice
 from string import ascii_lowercase
 
-from ..mapi_client.mapi_client import MapiThinClient
-from ..mapi_client.auth import RSA_SHA256Auth
+from ..mapi_client.mapi_client import MapiClient
+from ..mapi_client.auth import RsaSha256Auth
 
 
-mapiclient = MapiThinClient(
+mapiclient = MapiClient(
     # RSA encryption is preferred
-    auth=RSA_SHA256Auth('tests/testkey'),
+    auth=RsaSha256Auth('tests/testkey'),
     mcash_merchant='testmerchant2',  # The merchant id we use
     mcash_user='admin',              # The user to use for our merchant
     additional_headers={
