@@ -3,12 +3,12 @@
 A SDK used to make communication with mCASH's merchant API easier. A basic usage example is shown in 'mcash/mapi_client/mapi_client_example.py'.
 
 ### Usage
-MapiClient is the main class and can be found in 'mcash/mapi_client/mapi_client.py'. It's constructor takes 4 required arguments:
+MapiClient is the main class and can be found in [mapi_client.py](mcash/mapi_client/mapi_client.py). It's constructor takes 4 required arguments:
 
 * mcash_merchant: Your merchant id, received while registering.
 * mcash_user: Your merchant user, added in the SSP.
-* base_url: The base url to use. For production this is "http://api.mca.sh/". The URL's to use for testing can be found at http://dev.mca.sh/.
-* auth: The authentication method to use. Accepts one of the classes defined in 'mcash/mapi_client/auth.py'. See the 'Auth' section for more information.
+* base_url: The base url to use. For production this is [http://api.mca.sh/]. The URL's to use for testing can be found at [http://dev.mca.sh/].
+* auth: The authentication method to use. Accepts one of the classes defined in [auth.py](mcash/mapi_client/auth.py). See the 'Auth' section for more information.
 
 After being instantiated with these arguments, the client is ready to use. All functionality is provided as a member method of the MapiClient class.
 
