@@ -72,7 +72,7 @@ class MapiClientExample(object):
 
         # Set up a callback client, pusherclient in this case
         self.callback_client = PusherConnector(
-            pusher_api_key='b9ad66f2dcad7152fb47',  # Your pusher API key
+            pusher_api_key='<your_pusher_api_key>',  # Your pusher API key
             callback_chan='m-winterwarming-pos_callback_chan',  # chan to use
             logger=self.logger)
 
@@ -89,7 +89,7 @@ class MapiClientExample(object):
             base_url='https://mcashtestbed.appspot.com/merchant/v1',
             additional_headers={
                 'X-Testbed-Token':          # mcash testbed needs a token
-                'KEG5SFpAIPjV53s0RUO-q4yIGPzMv5wJGCzLdrCxFpQ'
+                '<your_testbed_token>'
             },
             logger=self.logger
         )
