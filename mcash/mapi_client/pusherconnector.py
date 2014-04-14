@@ -3,6 +3,8 @@ import logging
 from time import sleep
 from threading import Thread, Event
 
+__all__ = ["PusherConnector"]
+
 
 class PusherConnector(object):
 

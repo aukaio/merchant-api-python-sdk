@@ -17,5 +17,6 @@ setup(
                       "pusherclient>=0.2.0",
                       "wsgiref>=0.1.2"],
     dependency_links=["https://github.com/ekulyk/PythonPusherClient/tarball/master#egg=pusherclient-0.2.0"],
-    packages=["mapi_client"],
+    packages=["mcash.mapi_client", "mcash"],
+    namespace_packages=['mcash']
 )

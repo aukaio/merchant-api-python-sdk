@@ -4,8 +4,11 @@ from validation import validate_input
 import logging
 import traceback
 
+__all__ = ["MapiClient"]
+
 
 class MapiClient(object):
+
     _default_headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
         'Content-Type': 'application/json',

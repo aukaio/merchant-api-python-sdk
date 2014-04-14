@@ -1,9 +1,8 @@
-from mapi_client import MapiClient
+from mcash import mapi_client
+from mcash.mapi_client.pusherconnector import PusherConnector
 import sys
 import time
 import logging
-from pusherconnector import PusherConnector
-from auth import RsaSha256Auth
 import signal
 import pprint
 import uuid
@@ -83,8 +82,8 @@ class MapiClientExample(object):
             self.pusher_connected)
 
         # Set up the mAPI client
-        self.mapiclient = MapiClient(
-            auth=RsaSha256Auth('rsakey'),  # RSA encryption is preferred
+        self.mapiclient = mapi_client.MapiClient(
+            auth=mapi_client.RsaSha256Auth('rsakey'),  # RSA encryption is preferred
             mcash_merchant='swaggershop',   # The merchant id we use
             mcash_user='admin',             # The user to use for our merchant
             additional_headers={
