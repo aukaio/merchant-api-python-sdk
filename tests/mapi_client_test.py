@@ -1,16 +1,14 @@
+from mcash import mapi_client
 from requests import HTTPError
 from random import choice
 from string import ascii_lowercase
 
-from mapi_client import mAPIClient
-from auth import RSA_SHA256Auth
 
-
-mapiclient = mAPIClient(
+mapiclient = mapi_client.MapiClient(
     # RSA encryption is preferred
-    auth=RSA_SHA256Auth('tests/testkey'),
+    auth=mapi_client.RsaSha256Auth('tests/testkey'),
     mcash_merchant='testmerchant2',  # The merchant id we use
-    mcash_user='admin',             # The user to use for our merchant
+    mcash_user='admin',              # The user to use for our merchant
     additional_headers={
         'X-Testbed-Token':           # mcash testbed needs a token
         'KEG5SFpAIPjV53s0RUO-q4yIGPzMv5wJGCzLdrCxFpQ'

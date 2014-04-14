@@ -3,6 +3,8 @@ import logging
 from time import sleep
 from threading import Thread, Event
 
+__all__ = ["PusherConnector"]
+
 
 class PusherConnector(object):
 
@@ -43,19 +45,7 @@ class PusherConnector(object):
             event: event to react to
             handler: handler to call when event is received
         """
-        for attempt in range(20):
-            try:
-                self.channel.bind(event, handler)
-            except AttributeError:
-                self.logger.warn("sleeping 2 seconds before retry")
-                sleep(2)
-                self.logger.warn("retry {}/20".format(attempt))
-            except:
-                raise
-            else:
-                break
-        else:
-            self.logger.error("Binding pusher event failed")
+        self.channel.bind(event, handler)
 
     def _runForever(self, stop_event):
         """Runs the main loop
