@@ -86,6 +86,7 @@ class MapiClientExample(object):
             auth=mapi_client.RsaSha256Auth('rsakey'),  # RSA encryption is preferred
             mcash_merchant='swaggershop',   # The merchant id we use
             mcash_user='admin',             # The user to use for our merchant
+            base_url='https://mcashtestbed.appspot.com/merchant/v1',
             additional_headers={
                 'X-Testbed-Token':          # mcash testbed needs a token
                 'KEG5SFpAIPjV53s0RUO-q4yIGPzMv5wJGCzLdrCxFpQ'
