@@ -16,9 +16,9 @@ class MapiClient(object):
 
     def __init__(self,
                  auth,
-                 base_url='https://mcashtestbed.appspot.com/merchant/v1',
-                 mcash_merchant='',
-                 mcash_user='',
+                 mcash_merchant,
+                 mcash_user,
+                 base_url,
                  additional_headers={},
                  logger=None
                  ):
