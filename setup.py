@@ -3,7 +3,7 @@ from setuptools import setup
 VERSION = "0.1"
 
 setup(
-    name="mcash_mapi_client",
+    name="mcash-mapi-client",
     version=VERSION,
     description="Thin python wrapper around mCASH's merchant api",
     author="mCASH Norge AS",
