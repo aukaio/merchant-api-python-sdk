@@ -84,7 +84,7 @@ class MapiClientExample(object):
         # Set up the mAPI client
         self.mapiclient = mapi_client.MapiClient(
             auth=mapi_client.RsaSha256Auth('rsakey'),  # RSA encryption is preferred
-            mcash_merchant='swaggershop',   # The merchant id we use
+            mcash_merchant='exampleshop',   # The merchant id we use
             mcash_user='admin',             # The user to use for our merchant
             base_url='https://mcashtestbed.appspot.com/merchant/v1',
             additional_headers={
