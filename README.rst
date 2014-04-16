@@ -2,18 +2,22 @@
 mcash-mapi-client
 =================
 
-A SDK used to make communication with mCASH's merchant API easier. A basic usage example is shown in `mapi_client_example.py mcash/mapi_client/mapi_client_example.py`.
+A SDK used to make communication with mCASH's merchant API easier. A basic usage example is shown in `mapi_client_example`.
+
+Before using this client
+========================
+
+* Make sure you are familiar with the documentation, found at: `<http://dev.mca.sh/merchant/>`_. Consider reading the tutorials at `<http://dev.mca.sh/tutorials/>`_.
+* Register as a merchant at `<https://my.mca.sh/ssp/merchant/>`_
 
 Usage
 =====
-(This quick readme assumes you are familiar with the documentation, found at: `http://mcashdevelop.appspot.com/apidoc/merchant/`)
-
-MapiClient is the main class and can be found in `mapi_client.py mcash/mapi_client/mapi_client.py`. It's constructor takes 4 required arguments:
+MapiClient is the main class and can be found in `mapi_client`. It's constructor takes 4 required arguments:
 
 * mcash_merchant: Your merchant id, received while registering.
 * mcash_user: Your merchant user, added in the SSP.
-* base_url: The base url to use. For production this is `http://api.mca.sh/`. The URL's to use for testing can be found at `http://dev.mca.sh/`.
-* auth: The authentication method to use. Accepts one of the classes defined in `auth.py mcash/mapi_client/auth.py`.  See the 'Auth' section for more information.
+* base_url: The base url to use. For production this is `<http://api.mca.sh/>`_. The URL's to use for testing can be found at `<http://dev.mca.sh/>`_.
+* auth: The authentication method to use. Accepts one of the classes defined in `auth`.  See the 'Auth' section for more information.
 
 After being instantiated with these arguments, the client is ready to use. All functionality is provided as member methods of the MapiClient class.
 
@@ -25,7 +29,7 @@ The merchant API supports 3 authentication levels:
 * Secret
 * RSA
 
-These are represented in the merchant API client as classes in the `auth.py mcash/mapi_client/auth.py` file. When passed as an argument to the MapiClient during instantiation, authentication will be automatically applied to every request.
+These are represented in the merchant API client as classes in the `auth` file. When passed as an argument to the MapiClient during instantiation, authentication will be automatically applied to every request.
 
 
 License
