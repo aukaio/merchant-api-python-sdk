@@ -14,9 +14,10 @@ setup(
                       "requests>=2.2.1",
                       "voluptuous>=0.8.4",
                       "websocket-client>=0.12.0",
-                      "pusherclient>=0.2.0",
                       "wsgiref>=0.1.2"],
-    dependency_links=["https://github.com/ekulyk/PythonPusherClient/tarball/master#egg=pusherclient-0.2.0"],
+    extras_require={
+        'mapi_client_example':  ["pusherclient>=0.2.0"]
+    },
     packages=["mcash.mapi_client", "mcash"],
     namespace_packages=['mcash']
 )
