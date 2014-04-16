@@ -8,7 +8,7 @@ Usage
 =====
 (This quick readme assumes you are familiar with the documentation, found at: `http://mcashdevelop.appspot.com/apidoc/merchant/`)
 
-MapiClient is the main class and can be found in [mapi_client.py](mcash/mapi_client/mapi_client.py). It's constructor takes 4 required arguments:
+MapiClient is the main class and can be found in `mapi_client.py mcash/mapi_client/mapi_client.py`. It's constructor takes 4 required arguments:
 
 * mcash_merchant: Your merchant id, received while registering.
 * mcash_user: Your merchant user, added in the SSP.
