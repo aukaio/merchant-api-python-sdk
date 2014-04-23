@@ -7,6 +7,7 @@ A SDK used to make communication with mCASH's merchant API easier. A basic usage
 Before using this client
 ------------------------
 
+* Be aware that this client is in beta. Backwards incompatible changes should not occur, but updates might be frequent. Comments and pull requests are welcome.
 * Make sure you are familiar with the documentation, found at: `<http://dev.mca.sh/merchant/>`_. Consider reading the tutorials at `<http://dev.mca.sh/tutorials/>`_.
 * Register as a merchant at `<https://my.mca.sh/ssp/merchant/>`_
 
