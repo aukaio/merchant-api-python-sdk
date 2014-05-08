@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 setup(
     name="mcash-mapi-client",
@@ -13,7 +13,6 @@ setup(
     install_requires=["pycrypto>=2.6",
                       "requests>=2.2.1",
                       "voluptuous>=0.8.4",
-                      "websocket-client>=0.12.0",
                       "wsgiref>=0.1.2"],
     extras_require={
         'mapi_client_example':  ["pusherclient>=0.2.0"]
