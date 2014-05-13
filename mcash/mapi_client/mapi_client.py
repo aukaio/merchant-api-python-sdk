@@ -1,13 +1,38 @@
-from requests import Request, Session
+import requests
 import json
 from validation import validate_input
 import logging
-import traceback
 
-__all__ = ["MapiClient"]
+
+__all__ = ["MapiClient", "MapiResponse", "MapiError"]
+
+
+class MapiResponse(object):
+    def __init__(self, status, headers, content):
+        self.status = status
+        self.headers = headers
+        self.content = content
+
+    def json(self):
+        return json.loads(self.content)
+
+    def __iter__(self):
+        yield self.status
+        yield self.headers
+        yield self.content
+
+
+class MapiError(MapiResponse, Exception):
+    def __init__(self, status, headers, content):
+        MapiResponse.__init__(self, status, headers, content)
+        Exception.__init__(self, status, headers, content)
 
 
 class MapiClient(object):
+    @staticmethod
+    def request_dispatcher(method, url, data, headers, auth):
+        res = requests.request(method, url, data=data, headers=headers, auth=auth)
+        return MapiResponse(res.status_code, res.headers, res.content)
 
     _default_headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
@@ -19,45 +44,43 @@ class MapiClient(object):
                  mcash_merchant,
                  mcash_user,
                  base_url,
-                 additional_headers={},
+                 additional_headers=None,
                  logger=None
                  ):
+        if additional_headers is None:
+            additional_headers = {}
+        self.auth = auth
         self.logger = logger or logging.getLogger(__name__)
         self.base_url = base_url
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
-        # Start a new session
-        self.session = Session()
-        self.session.auth = auth
-        self.session.headers.clear()
-        user_info_headers = {
-            'X-Mcash-Merchant': mcash_merchant,
-            'X-Mcash-User': mcash_user,
-        }
-        self.session.headers.update(self._default_headers)
-        self.session.headers.update(user_info_headers)
-        self.session.headers.update(additional_headers)
+        self.mcash_user = mcash_user
+        self.default_headers = self._default_headers.copy()
+        self.default_headers.update(additional_headers)
 
-    def do_req(self, method, url, args=None):
+    def get_headers(self, headers=None):
+        if not headers:
+            headers = {}
+        h = self.default_headers.copy()
+        h.update({
+            'X-Mcash-Merchant': self.mcash_merchant,
+            'X-Mcash-User': self.mcash_user,
+        })
+        h.update(headers)
+        return h
+
+    def do_req(self, method, url, args=None, headers=None, status=None):
         """Used internally to send a request to the API, left public
         so it can be used to talk to the API more directly.
         """
-        if args:  # if args is passed dump it to json
+        if args:
             args = json.dumps(args)
-        req = Request(method,
-                      url=url,
-                      data=args)
-
-        resp = self.session.send(self.session.prepare_request(req))
-        if resp.status_code / 100 is not 2:
-            try:  # wrapped in a try so we can catch and print a stacktrace
-                resp.raise_for_status()
-            except:  # need to join lines from tb together here
-                msg = ''.join('' + l for l in traceback.format_stack())
-                self.logger.error(msg)
-                self.logger.error(resp.text)
-                raise
-        return resp
+        res = self.request_dispatcher(method, url, data=args, headers=self.get_headers(headers), auth=self.auth)
+        if not isinstance(res, MapiResponse):
+            res = MapiResponse(*res)
+        if status is None and res.status // 100 != 2:
+            raise MapiError(*res)
+        return res
 
     def _depagination_generator(self, url):
         data = self.do_req('GET', url).json()
