@@ -9,10 +9,8 @@ import sys
 import httplib
 
 
-def create_merchant(testbed_token, integrator_name):
+def create_merchant(url_base, testbed_token, integrator_name):
     '''creates a merchant and returns the merchant_id'''
-
-    url_base = 'https://mcashtestbed.appspot.com'
     print 'Create a merchant on testbed'
     headers = {
         'Content-Type': 'application/json',

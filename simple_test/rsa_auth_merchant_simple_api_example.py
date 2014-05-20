@@ -7,15 +7,13 @@ import httplib
 from optparse import OptionParser
 
 
-def rsa_auth_merchant_simple_test(
-        merchant_id, merchant_user, pemfilename, testbed_token):
+def rsa_auth_merchant_simple_api_example(url_base, merchant_id, merchant_user, pemfilename, testbed_token):
 
     print "setting up a RSA auth session with merchant_user private RSA key"
     s = requests.Session()
     s.auth = RSA_SHA256Auth(pemfilename)
     # from this point all requests through s use rsa auth, eg.:
 
-    url_base = 'https://mcashtestbed.appspot.com'
     headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
         'Content-Type': 'application/json',
@@ -184,13 +182,17 @@ if __name__ == '__main__':
                       help="set RSA private key file. Should be a .pem file created when the user is created")
     parser.add_option("-t", "--testbed_token", dest="testbed_token",
                       help="set the testbed_token. Should be recieved in an email")
+    parser.add_option("-s", "--server", dest="server", default='mcashtestbed.appspot.com',
+                      help="set the server")
     (options, args) = parser.parse_args()
 
+    url_base = 'https://'+options.server
     if options.merchant_id and options.merchant_user and options.pemfilename and options.testbed_token:
-        rsa_auth_merchant_simple_test(options.merchant_id,
-                                      options.merchant_user,
-                                      options.pemfilename,
-                                      options.testbed_token)
+        rsa_auth_merchant_simple_api_example(url_base,
+                                             options.merchant_id,
+                                             options.merchant_user,
+                                             options.pemfilename,
+                                             options.testbed_token)
     else:
         print "All command line options not given. Exiting.."
         sys.exit(1)

@@ -23,9 +23,7 @@ def gen_rsa_key_pair_files(merchant_id, merchant_user):
     fh.close()
 
 
-def create_merchant_user(
-        my_testbed_token, integrator_pem_file, merchant_id, merchant_user):
-    url_base = 'https://mcashtestbed.appspot.com'
+def create_merchant_user(url_base, my_testbed_token, integrator_pem_file, merchant_id, merchant_user):
     headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
         'Content-Type': 'application/json',
@@ -60,4 +58,5 @@ def create_merchant_user(
     s2 = s.prepare_request(req)
     r = s.send(s.prepare_request(req))
     print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
+    print "created merchant_user = {}".format(merchant_user)
     assert r.status_code == 201, "Expected r.status_code to be 201"
