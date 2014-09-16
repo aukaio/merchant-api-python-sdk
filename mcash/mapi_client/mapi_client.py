@@ -54,6 +54,7 @@ class MapiClient(object):
         if args:  # if args is passed dump it to json
             args = json.dumps(args)
         req = Request(method,
+                      allow_redirects=False,
                       url=url,
                       data=args)
 
