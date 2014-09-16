@@ -34,8 +34,8 @@ class RsaSha256Auth(AuthBase):
 
     """Attaches RSA authentication to the given Request object."""
 
-    def __init__(self, privkey_path):
-        self.privkey_path = privkey_path
+    def __init__(self, privkey):
+        self.privkey = privkey
 
     def __call__(self, r):
         r.headers['X-Mcash-Timestamp'] = self._get_timestamp()
@@ -59,8 +59,7 @@ class RsaSha256Auth(AuthBase):
     def _sha256_sign(self, r):
         """Sign the request with SHA256.
         """
-        with open(self.privkey_path, 'r') as fd:
-            signer = PKCS1_v1_5.new(RSA.importKey(fd.read()))
+        signer = PKCS1_v1_5.new(RSA.importKey(self.privkey))
 
         d = ''
         sign_headers = r.method.upper() + '|' + r.url + '|'
