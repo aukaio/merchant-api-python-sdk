@@ -54,11 +54,10 @@ class MapiClient(object):
         if args:  # if args is passed dump it to json
             args = json.dumps(args)
         req = Request(method,
-                      allow_redirects=False,
                       url=url,
                       data=args)
 
-        resp = self.session.send(self.session.prepare_request(req))
+        resp = self.session.send(self.session.prepare_request(req), allow_redirects=False)
         if resp.status_code / 100 is not 2:
             try:  # wrapped in a try so we can catch and print a stacktrace
                 resp.raise_for_status()
