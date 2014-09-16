@@ -17,11 +17,12 @@ class MapiClient(object):
     def __init__(self,
                  auth,
                  mcash_merchant,
-                 mcash_user,
                  base_url,
+                 mcash_user=None,
+                 mcash_integrator=None,
                  additional_headers={},
                  logger=None
-                 ):
+    ):
         self.logger = logger or logging.getLogger(__name__)
         self.base_url = base_url
         # save the merchant_id, we will use it for some callback values
@@ -30,10 +31,18 @@ class MapiClient(object):
         self.session = Session()
         self.session.auth = auth
         self.session.headers.clear()
+        if ((mcash_user is None and mcash_integrator is None) or
+            (mcash_user is not None and mcash_integrator is not None)):
+            raise ValueError("either mcash_user or mcash_integrator should be set")
         user_info_headers = {
             'X-Mcash-Merchant': mcash_merchant,
-            'X-Mcash-User': mcash_user,
         }
+
+        if mcash_user:
+            user_info_headers['X-Mcash-User'] = mcash_user
+        if mcash_integrator:
+            user_info_headers['X-Mcash-Integrator'] = mcash_integrator
+
         self.session.headers.update(self._default_headers)
         self.session.headers.update(user_info_headers)
         self.session.headers.update(additional_headers)
