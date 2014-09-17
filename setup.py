@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 VERSION = "0.1.2"
 
@@ -17,6 +17,6 @@ setup(
     extras_require={
         'mapi_client_example':  ["pusherclient>=0.2.0"]
     },
-    packages=["mcash.mapi_client", "mcash"],
+    packages=find_packages('.'),
     namespace_packages=['mcash']
 )
