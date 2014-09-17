@@ -40,6 +40,12 @@ create_pos_validator = Schema({
                  'accuracy': float}
 })
 
+create_shortlink_validator = Schema({
+    'callback_uri': str,
+    'description': str,
+    'serial_number': str
+})
+
 update_pos_validator = Schema({
     Required('pos_id'): str,
     Required('name'): str,
@@ -67,7 +73,7 @@ create_payment_request_validator = Schema({
 })
 
 update_payment_request_validator = Schema({
-    Required('tid'): str,
+    'tid': str,
     'ledger': str,
     'display_message_uri': str,
     'callback_uri': str,
@@ -82,12 +88,6 @@ update_payment_request_validator = Schema({
 update_ticket_validator = Schema({
     Required('tid'): str,
     'tickets': list,
-})
-
-create_shortlink_validator = Schema({
-    'callback_uri': str,
-    'description': str,
-    'serial_number': str
 })
 
 update_shortlink_validator = Schema({
