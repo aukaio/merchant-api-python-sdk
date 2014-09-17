@@ -16,10 +16,11 @@ class MapiClient(object):
     }
 
     def __init__(self,
+                 base_url,
                  auth,
                  mcash_merchant,
-                 mcash_user,
-                 base_url,
+                 mcash_user=None,
+                 mcash_integrator=None,
                  additional_headers=None,
                  logger=None
                  ):
@@ -36,7 +37,10 @@ class MapiClient(object):
         self.base_url = base_url
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
+        if (mcash_user and mcash_integrator) or (not mcash_user and not mcash_integrator):
+            raise ValueError("either mcash_user or mcash_integrator should be set")
         self.mcash_user = mcash_user
+        self.mcash_integrator = mcash_integrator
         self.default_headers = self._default_headers.copy()
         self.default_headers.update(additional_headers)
 
@@ -46,8 +50,13 @@ class MapiClient(object):
         h = self.default_headers.copy()
         h.update({
             'X-Mcash-Merchant': self.mcash_merchant,
-            'X-Mcash-User': self.mcash_user,
         })
+
+        if self.mcash_integrator:
+            h['X-Mcash-Integrator'] = self.mcash_integrator
+        else:
+            h['X-Mcash-User'] = self.mcash_user
+
         h.update(headers)
         return h
 
