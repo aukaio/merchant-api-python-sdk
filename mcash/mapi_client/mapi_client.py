@@ -64,6 +64,7 @@ class MapiClient(object):
         """Used internally to send a request to the API, left public
         so it can be used to talk to the API more directly.
         """
+        body = json.dumps(body)
         res = self.backend.dispatch_request(method=method,
                                             url=url,
                                             body=body,
