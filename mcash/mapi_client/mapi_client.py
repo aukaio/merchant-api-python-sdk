@@ -383,6 +383,7 @@ class MapiClient(object):
                      'additional_amount': additional_amount,
                      'capture_id': capture_id,
                      'action': action}
+        arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
                            + tid + '/', arguments)
