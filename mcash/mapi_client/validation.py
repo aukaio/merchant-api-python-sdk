@@ -81,8 +81,8 @@ update_payment_request_validator = Schema({
     'amount': basestring,
     'additional_amount': basestring,
     'capture_id': basestring,
-    'action': Any('reauth', 'capture', 'abort', 'release',
-                  'REAUTH', 'CAPTURE', 'ABORT', 'RELEASE'),
+    'action': Any('reauth', 'capture', 'abort', 'release', 'refund',
+                  'REAUTH', 'CAPTURE', 'ABORT', 'RELEASE', 'REFUND'),
 })
 
 update_ticket_validator = Schema({

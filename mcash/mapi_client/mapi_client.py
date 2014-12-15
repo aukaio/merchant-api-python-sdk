@@ -375,8 +375,7 @@ class MapiClient(object):
             tid:
                 Transaction id assigned by mCASH
             action:
-                Action to perform, the main difference is what it looks like in
-                App UI.
+                Action to perform.
         """
         arguments = {'ledger': ledger,
                      'display_message_uri': display_message_uri,
