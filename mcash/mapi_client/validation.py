@@ -16,109 +16,109 @@ def validate_input(function):
     return wrapper
 
 create_user_validator = Schema({
-    Required('user_id'): str,
+    Required('user_id'): basestring,
     'roles': [Any('user', 'superuser')],
-    'netmask': str,
-    'secret': All(str, Length(min=8, max=64)),
-    'pubkey': str
+    'netmask': basestring,
+    'secret': All(basestring, Length(min=8, max=64)),
+    'pubkey': basestring
 })
 
 update_user_validator = Schema({
-    Required('user_id'): str,
+    Required('user_id'): basestring,
     'roles': [Any('user', 'superuser')],
-    'netmask': str,
-    'secret': All(str, Length(min=8, max=64)),
-    'pubkey': str
+    'netmask': basestring,
+    'secret': All(basestring, Length(min=8, max=64)),
+    'pubkey': basestring
 })
 
 create_pos_validator = Schema({
-    Required('name'): str,
-    Required('pos_type'): str,
-    Required('pos_id'): str,
+    Required('name'): basestring,
+    Required('pos_type'): basestring,
+    Required('pos_id'): basestring,
     'location': {'latitude': float,
                  'longitude': float,
                  'accuracy': float}
 })
 
+create_shortlink_validator = Schema({
+    'callback_uri': basestring,
+    'description': basestring,
+    'serial_number': basestring
+})
+
 update_pos_validator = Schema({
-    Required('pos_id'): str,
-    Required('name'): str,
-    Required('pos_type'): str,
+    Required('pos_id'): basestring,
+    Required('name'): basestring,
+    Required('pos_type'): basestring,
     'location': {'latitude': float,
                  'longitude': float,
                  'accuracy': float}
 })
 
 create_payment_request_validator = Schema({
-    'ledger': str,
-    'display_message_uri': str,
-    'callback_uri': str,
-    Required('customer'): All(str, Length(max=100)),
-    Required('currency'): All(str, Length(min=3, max=3)),
-    Required('amount'): str,
-    'additional_amount': All(float, Range(min=0)),
+    'ledger': basestring,
+    'display_message_uri': basestring,
+    'callback_uri': basestring,
+    Required('customer'): All(basestring, Length(max=100)),
+    Required('currency'): All(basestring, Length(min=3, max=3)),
+    Required('amount'): basestring,
+    'additional_amount': basestring,
     'additional_edit': bool,
     Required('allow_credit'): bool,
-    Required('pos_id'): str,
-    Required('pos_tid'): str,
-    'text': str,
+    Required('pos_id'): basestring,
+    Required('pos_tid'): basestring,
+    'text': basestring,
     Required('action'): Any('auth', 'sale', 'AUTH', 'SALE'),
     Required('expires_in'): All(int, Range(min=0, max=2592000)),
 })
 
 update_payment_request_validator = Schema({
-    Required('tid'): str,
-    'ledger': str,
-    'display_message_uri': str,
-    'callback_uri': str,
-    'currency': All(str, Length(min=3, max=3)),
-    'amount': str,
-    'additional_amount': All(float, Range(min=0)),
-    'capture_id': str,
-    'action': Any('reauth', 'capture', 'abort', 'release',
-                  'REAUTH', 'CAPTURE', 'ABORT', 'RELEASE'),
+    'tid': basestring,
+    'ledger': basestring,
+    'display_message_uri': basestring,
+    'callback_uri': basestring,
+    'currency': All(basestring, Length(min=3, max=3)),
+    'amount': basestring,
+    'additional_amount': basestring,
+    'capture_id': basestring,
+    'action': Any('reauth', 'capture', 'abort', 'release', 'refund',
+                  'REAUTH', 'CAPTURE', 'ABORT', 'RELEASE', 'REFUND'),
 })
 
 update_ticket_validator = Schema({
-    Required('tid'): str,
+    Required('tid'): basestring,
     'tickets': list,
 })
 
-create_shortlink_validator = Schema({
-    'callback_uri': str,
-    'description': str,
-    'serial_number': str
-})
-
 update_shortlink_validator = Schema({
-    Required('shortlink_id'): str,
-    'callback_uri': str,
-    'description': str
+    Required('shortlink_id'): basestring,
+    'callback_uri': basestring,
+    'description': basestring
 })
 
 create_ledger_validator = Schema({
-    Required('currency'): str,
-    'description': str
+    Required('currency'): basestring,
+    'description': basestring
 })
 
 update_ledger_validator = Schema({
-    Required('ledger_id'): str,
-    'description': str
+    Required('ledger_id'): basestring,
+    'description': basestring
 })
 
 close_report_validator = Schema({
-    Required('ledger_id'): str,
-    Required('report_id'): str,
-    'callback_uri': str,
+    Required('ledger_id'): basestring,
+    Required('report_id'): basestring,
+    'callback_uri': basestring,
 })
 
 create_permission_request_validator = Schema({
-    'ledger': str,
-    Required('customer'): All(str, Length(max=100)),
-    Required('pos_id'): str,
-    Required('pos_tid'): str,
-    'text': str,
-    'callback_uri': str,
-    Required('scope'): str,
+    'ledger': basestring,
+    Required('customer'): All(basestring, Length(max=100)),
+    Required('pos_id'): basestring,
+    Required('pos_tid'): basestring,
+    'text': basestring,
+    'callback_uri': basestring,
+    Required('scope'): basestring,
     'expires_in': All(int, Range(min=0, max=2592000)),
 })

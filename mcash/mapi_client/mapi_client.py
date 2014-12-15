@@ -1,72 +1,83 @@
-from requests import Request, Session
 import json
 from validation import validate_input
 import logging
-import traceback
+from mapi_response import MapiResponse
+from backends.requestsframework import RequestsFramework
+from mapi_error import MapiError
+
 
 __all__ = ["MapiClient"]
 
 
 class MapiClient(object):
-
     _default_headers = {
         'Accept': 'application/vnd.mcash.api.merchant.v1+json',
         'Content-Type': 'application/json',
     }
 
     def __init__(self,
+                 base_url,
                  auth,
                  mcash_merchant,
-                 base_url,
                  mcash_user=None,
                  mcash_integrator=None,
-                 additional_headers={},
+                 additional_headers=None,
                  logger=None
-    ):
+                 ):
+        """
+        TODO: we need some explanations of the arguments here
+        """
+
+        if additional_headers is None:
+            additional_headers = {}
+
+        self.backend = RequestsFramework()
+        self.auth = auth
         self.logger = logger or logging.getLogger(__name__)
         self.base_url = base_url
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
-        # Start a new session
-        self.session = Session()
-        self.session.auth = auth
-        self.session.headers.clear()
-        if ((mcash_user is None and mcash_integrator is None) or
-            (mcash_user is not None and mcash_integrator is not None)):
+        if (mcash_user and mcash_integrator) or (not mcash_user and not mcash_integrator):
             raise ValueError("either mcash_user or mcash_integrator should be set")
-        user_info_headers = {
-            'X-Mcash-Merchant': mcash_merchant,
-        }
+        self.mcash_user = mcash_user
+        self.mcash_integrator = mcash_integrator
+        self.default_headers = self._default_headers.copy()
+        self.default_headers.update(additional_headers)
 
-        if mcash_user:
-            user_info_headers['X-Mcash-User'] = mcash_user
-        if mcash_integrator:
-            user_info_headers['X-Mcash-Integrator'] = mcash_integrator
+    def get_headers(self, headers=None):
+        if not headers:
+            headers = {}
+        h = self.default_headers.copy()
+        h.update({
+            'X-Mcash-Merchant': self.mcash_merchant,
+        })
 
-        self.session.headers.update(self._default_headers)
-        self.session.headers.update(user_info_headers)
-        self.session.headers.update(additional_headers)
+        if self.mcash_integrator:
+            h['X-Mcash-Integrator'] = self.mcash_integrator
+        else:
+            h['X-Mcash-User'] = self.mcash_user
 
-    def do_req(self, method, url, args=None):
+        h.update(headers)
+        return h
+
+    def do_req(self, method, url, body=None, headers=None, status=None):
         """Used internally to send a request to the API, left public
         so it can be used to talk to the API more directly.
         """
-        if args:  # if args is passed dump it to json
-            args = json.dumps(args)
-        req = Request(method,
-                      url=url,
-                      data=args)
-
-        resp = self.session.send(self.session.prepare_request(req), allow_redirects=False)
-        if resp.status_code / 100 is not 2:
-            try:  # wrapped in a try so we can catch and print a stacktrace
-                resp.raise_for_status()
-            except:  # need to join lines from tb together here
-                msg = ''.join('' + l for l in traceback.format_stack())
-                self.logger.error(msg)
-                self.logger.error(resp.text)
-                raise
-        return resp
+        if body is None:
+            body = ''
+        else:
+            body = json.dumps(body)
+        res = self.backend.dispatch_request(method=method,
+                                            url=url,
+                                            body=body,
+                                            headers=self.get_headers(headers),
+                                            auth=self.auth)
+        if not isinstance(res, MapiResponse):
+            res = MapiResponse(*res)
+        if status is None and res.status // 100 != 2:
+            raise MapiError(*res)
+        return res
 
     def _depagination_generator(self, url):
         data = self.do_req('GET', url).json()
@@ -87,35 +98,6 @@ class MapiClient(object):
         for x in self._depagination_generator(url):
             items += x
         return items
-
-    def _get_parameters(self, only=None, exclude=None, ignore='self'):
-        """Returns a dictionary of the calling functions
-        parameter names and values.
-
-        Arguments:
-            only:
-                use this to only return parameters from this list of names.
-            exclude:
-                use this to return every parameter *except* those included in
-                this list of names.
-            ignore:
-                use this inside methods to ignore the calling object's name.
-                For convenience, it ignores 'self' by default.
-        """
-        import inspect
-        args, varargs, varkw, defaults = \
-            inspect.getargvalues(inspect.stack()[1][0])
-        if only is None:
-            only = args[:]
-            if varkw:
-                only.extend(defaults[varkw].keys())
-                defaults.update(defaults[varkw])
-        if exclude is None:
-            exclude = []
-        exclude.append(ignore)
-        return dict([(attrname, defaults[attrname])
-                     for attrname in only if attrname not in exclude
-                     if defaults[attrname] is not None])
 
     def get_merchant(self, merchant_id):
         """Endpoint for retrieving info about merchants
@@ -162,8 +144,11 @@ class MapiClient(object):
             pubkey:
                 RSA key used for authenticating by signing
         """
-        arguments = self._get_parameters()
-        arguments['id'] = arguments.pop('user_id')  # server expects id
+        arguments = {'id': user_id,
+                     'roles': roles,
+                     'netmask': netmask,
+                     'secret': secret,
+                     'pubkey': pubkey}
         return self.do_req('POST', self.base_url + '/user/', arguments).json()
 
     @validate_input
@@ -184,7 +169,10 @@ class MapiClient(object):
             pubkey:
                 RSA key used for authenticating by signing
         """
-        arguments = self._get_parameters(exclude=["user_id"])
+        arguments = {'roles': roles,
+                     'netmask': netmask,
+                     'secret': secret,
+                     'pubkey': pubkey}
         return self.do_req('PUT',
                            self.base_url + '/user/'
                            + user_id + '/', arguments)
@@ -217,9 +205,10 @@ class MapiClient(object):
                 The ID of the POS that is to be created. Has to be unique for
                 the merchant
         """
-        arguments = self._get_parameters()
-        arguments['id'] = arguments.pop('pos_id')  # server expects 'id'
-        arguments['type'] = arguments.pop('pos_type')  # server expects 'type'
+        arguments = {'name': name,
+                     'type': pos_type,
+                     'id': pos_id,
+                     'location': location}
         return self.do_req('POST', self.base_url + '/pos/', arguments).json()
 
     def get_all_pos(self):
@@ -242,8 +231,9 @@ class MapiClient(object):
             location:
                 Merchant location
         """
-        arguments = self._get_parameters(exclude=["pos_id"])
-        arguments['type'] = arguments.pop('pos_type')  # server expects 'type'
+        arguments = {'name': name,
+                     'type': pos_type,
+                     'location': location}
         return self.do_req('PUT',
                            self.base_url + '/pos/'
                            + pos_id + '/', arguments)
@@ -321,7 +311,20 @@ class MapiClient(object):
             expires_in:
                 Expiration in seconds from when server received request
         """
-        arguments = self._get_parameters()
+        arguments = {'customer': customer,
+                     'currency': currency,
+                     'amount': amount,
+                     'allow_credit': allow_credit,
+                     'pos_id': pos_id,
+                     'pos_tid': pos_tid,
+                     'action': action,
+                     'ledger': ledger,
+                     'display_message_uri': display_message_uri,
+                     'callback_uri': callback_uri,
+                     'additional_amount': additional_amount,
+                     'additional_edit': additional_edit,
+                     'text': text,
+                     'expires_in': expires_in}
         return self.do_req('POST', self.base_url + '/payment_request/',
                            arguments).json()
 
@@ -360,8 +363,6 @@ class MapiClient(object):
                 in the introduction. The data in the "object" part of the
                 message is the same as what can be retrieved by calling GET on
                 the "/payment_request/<tid>/outcome/" resource URI.
-            customer:
-                Customer identifiers include msisdn, scan token or access token
             currency:
                 3 chars https://en.wikipedia.org/wiki/ISO_4217
             amount:
@@ -374,10 +375,17 @@ class MapiClient(object):
             tid:
                 Transaction id assigned by mCASH
             action:
-                Action to perform, the main difference is what it looks like in
-                App UI.
+                Action to perform.
         """
-        arguments = self._get_parameters(exclude=['tid'])
+        arguments = {'ledger': ledger,
+                     'display_message_uri': display_message_uri,
+                     'callback_uri': callback_uri,
+                     'currency': currency,
+                     'amount': amount,
+                     'additional_amount': additional_amount,
+                     'capture_id': capture_id,
+                     'action': action}
+        arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
                            + tid + '/', arguments)
@@ -422,7 +430,7 @@ class MapiClient(object):
             tickets:
                 List of tickets to grant customer
         """
-        arguments = self._get_parameters(exclude=['tid'])
+        arguments = {'tickets': tickets}
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
                            + tid + '/ticket/', arguments)
@@ -441,7 +449,9 @@ class MapiClient(object):
                 Serial number on printed QR codes. This field is only used when
                 registering printed stickers issued by mCASH
         """
-        arguments = self._get_parameters()
+        arguments = {'callback_uri': callback_uri,
+                     'description': description,
+                     'serial_number': serial_number}
         return self.do_req('POST', self.base_url + '/shortlink/',
                            arguments).json()
 
@@ -466,7 +476,8 @@ class MapiClient(object):
             shortlink_id:
                 Shortlink id assigned by mCASH
         """
-        arguments = self._get_parameters(exclude=['shortlink_id'])
+        arguments = {'callback_uri': callback_uri,
+                     'description': description}
         return self.do_req('PUT',
                            self.base_url + '/shortlink/'
                            + shortlink_id + '/', arguments)
@@ -497,7 +508,8 @@ class MapiClient(object):
     def create_ledger(self, currency, description=None):
         """Create a ledger
         """
-        arguments = self._get_parameters()
+        arguments = {'currency': currency,
+                     'description': description}
         return self.do_req('POST',
                            self.base_url + '/ledger/', arguments).json()
 
@@ -516,7 +528,7 @@ class MapiClient(object):
             description:
                 Description of the Ledger and it's usage
         """
-        arguments = self._get_parameters(exclude=['ledger_id'])
+        arguments = {'description': description}
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
                            + ledger_id + '/', arguments)
@@ -579,7 +591,7 @@ class MapiClient(object):
             callback_uri:
                 Callback URI to be called when Report has finished closing.
         """
-        arguments = self._get_parameters(exclude=['ledger_id', 'report_id'])
+        arguments = {'callback_uri': callback_uri}
         return self.do_req('PUT',
                            self.base_url + '/ledger/'
                            + ledger_id + '/report/'
@@ -639,7 +651,14 @@ class MapiClient(object):
         The call is idempotent; that is, if one posts the same pos_id and
         pos_tid twice, only one Permission request is created.
         """
-        arguments = self._get_parameters()
+        arguments = {'customer': customer,
+                     'pos_id': pos_id,
+                     'pos_tid': pos_tid,
+                     'scope': scope,
+                     'ledger': ledger,
+                     'text': text,
+                     'callback_uri': callback_uri,
+                     'expires_in': expires_in}
         return self.do_req('POST',
                            self.base_url + '/permission_request/',
                            arguments).json()
