@@ -5,6 +5,10 @@ from mapi_response import MapiResponse
 from backends.requestsframework import RequestsFramework
 from mapi_error import MapiError
 
+from poster.encode import multipart_encode
+from poster.encode import MultipartParam
+
+
 
 __all__ = ["MapiClient"]
 
@@ -696,3 +700,8 @@ class MapiClient(object):
         return self.do_req('GET',
                            self.base_url + '/status_code/'
                            + value + '/').json()
+
+    def upload_attachment(self, url, mime_type, data):
+        data, headers = multipart_encode([MultipartParam('file', value=data, filename='filename', filetype=mime_type)])
+        data = "".join(data)
+        return self.do_req('POST', url, body=data, headers=headers)

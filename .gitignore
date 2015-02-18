@@ -38,3 +38,7 @@ nosetests.xml
 # vim/bsd
 .swp
 .core
+
+.venv
+.idea
+.ropeproject
