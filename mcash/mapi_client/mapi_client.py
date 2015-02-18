@@ -701,6 +701,15 @@ class MapiClient(object):
                            self.base_url + '/status_code/'
                            + value + '/').json()
 
+    def upload_receipt(self, url, data):
+        """Upload a receipt to the give url
+
+        :param url:
+        :param data:
+        :return:
+        """
+        return self.upload_attachment(url=url, data=data, mime_type='application/vnd.mcash.receipt.v1+json')
+
     def upload_attachment(self, url, mime_type, data):
         data, headers = multipart_encode([MultipartParam('file', value=data, filename='filename', filetype=mime_type)])
         data = "".join(data)
