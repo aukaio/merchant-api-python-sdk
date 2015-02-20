@@ -1,5 +1,5 @@
 import json
-from mapi_client import OpenAuth
+from mapi_client.auth import OpenAuth
 from validation import validate_input
 import logging
 from mapi_response import MapiResponse
