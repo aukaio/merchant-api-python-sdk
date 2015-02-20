@@ -718,5 +718,5 @@ class MapiClient(object):
                                             url=url,
                                             body=data,
                                             headers=headers,
-                                            auth=OpenAuth)
+                                            auth=OpenAuth())
         return res
