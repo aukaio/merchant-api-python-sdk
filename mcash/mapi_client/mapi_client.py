@@ -1,4 +1,5 @@
 import json
+from mapi_client import OpenAuth
 from validation import validate_input
 import logging
 from mapi_response import MapiResponse
@@ -716,5 +717,6 @@ class MapiClient(object):
         res = self.backend.dispatch_request(method='POST',
                                             url=url,
                                             body=data,
-                                            headers=headers)
+                                            headers=headers,
+                                            auth=OpenAuth)
         return res
