@@ -100,7 +100,8 @@ update_shortlink_validator = Schema({
 
 create_ledger_validator = Schema({
     Required('currency'): basestring,
-    'description': basestring
+    'description': basestring,
+    'auto_closing': basestring
 })
 
 update_ledger_validator = Schema({

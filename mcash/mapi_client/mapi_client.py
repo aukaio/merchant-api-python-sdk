@@ -516,11 +516,13 @@ class MapiClient(object):
                            + shortlink_id + '/').json()
 
     @validate_input
-    def create_ledger(self, currency, description=None):
+    def create_ledger(self, currency, description=None, auto_closing=None):
         """Create a ledger
         """
         arguments = {'currency': currency,
-                     'description': description}
+                     'description': description,
+                     'auto_closing': auto_closing}
+        arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('POST',
                            self.base_url + '/ledger/', arguments).json()
 
