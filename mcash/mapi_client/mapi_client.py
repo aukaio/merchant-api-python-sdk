@@ -337,7 +337,7 @@ class MapiClient(object):
     def update_payment_request(self, tid, currency=None, amount=None,
                                action=None, ledger=None, callback_uri=None,
                                display_message_uri=None, capture_id=None,
-                               additional_amount=None,):
+                               additional_amount=None, text=None, refund_id=None):
         """Update payment request, reauthorize, capture, release or abort
 
         It is possible to update ledger and the callback URIs for a payment
@@ -379,6 +379,10 @@ class MapiClient(object):
                 capture_id must be unset.
             tid:
                 Transaction id assigned by mCASH
+            refund_id:
+                Refund id needed when doing partial refund
+            text:
+                For example reason for refund.
             action:
                 Action to perform.
         """
@@ -389,7 +393,9 @@ class MapiClient(object):
                      'amount': amount,
                      'additional_amount': additional_amount,
                      'capture_id': capture_id,
-                     'action': action}
+                     'action': action,
+                     'text': text,
+                     'refund_id': refund_id}
         arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
