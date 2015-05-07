@@ -504,16 +504,18 @@ class MapiClient(object):
                            self.base_url + '/shortlink/'
                            + shortlink_id + '/').json()
 
-    def get_shortlink(self, shortlink_id):
+    def get_shortlink(self, shortlink_id_or_url):
         """Retrieve registered shortlink info
 
         Arguments:
-            shortlink_id:
-                Shortlink id assigned by mCASH
+            shortlink_id_or_url:
+                Shortlink id or url, assigned by mCASH
         """
-        return self.do_req('GET',
-                           self.base_url + '/shortlink/'
-                           + shortlink_id + '/').json()
+
+        if not "://" in shortlink_id_or_url:
+            shortlink_id_or_url = self.base_url + '/shortlink/' + shortlink_id_or_url + '/'
+
+        return self.do_req('GET', shortlink_id_or_url).json()
 
     @validate_input
     def create_ledger(self, currency, description=None):
