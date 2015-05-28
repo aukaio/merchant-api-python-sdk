@@ -270,7 +270,7 @@ class MapiClient(object):
                                pos_id, pos_tid, action, ledger=None,
                                display_message_uri=None, callback_uri=None,
                                additional_amount=None, additional_edit=None,
-                               text=None, expires_in=None):
+                               text=None, expires_in=None, required_scope=None):
         """Post payment request. The call is idempotent; that is, if one posts
         the same pos_id and pos_tid twice, only one payment request is created.
 
@@ -315,6 +315,8 @@ class MapiClient(object):
                 App UI.
             expires_in:
                 Expiration in seconds from when server received request
+            required_scope:
+                Scopes required to fulfill payment
         """
         arguments = {'customer': customer,
                      'currency': currency,
@@ -330,6 +332,10 @@ class MapiClient(object):
                      'additional_edit': additional_edit,
                      'text': text,
                      'expires_in': expires_in}
+
+        if required_scope:
+            arguments['required_scope'] = required_scope
+            
         return self.do_req('POST', self.base_url + '/payment_request/',
                            arguments).json()
 
@@ -337,7 +343,8 @@ class MapiClient(object):
     def update_payment_request(self, tid, currency=None, amount=None,
                                action=None, ledger=None, callback_uri=None,
                                display_message_uri=None, capture_id=None,
-                               additional_amount=None, text=None, refund_id=None):
+                               additional_amount=None, text=None, refund_id=None,
+                               required_scope=None):
         """Update payment request, reauthorize, capture, release or abort
 
         It is possible to update ledger and the callback URIs for a payment
@@ -385,6 +392,8 @@ class MapiClient(object):
                 For example reason for refund.
             action:
                 Action to perform.
+            required_scope:
+                Scopes required to fulfill payment
         """
         arguments = {'ledger': ledger,
                      'display_message_uri': display_message_uri,
@@ -396,6 +405,10 @@ class MapiClient(object):
                      'action': action,
                      'text': text,
                      'refund_id': refund_id}
+
+        if required_scope:
+            arguments['required_scope'] = required_scope
+
         arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
                            self.base_url + '/payment_request/'
