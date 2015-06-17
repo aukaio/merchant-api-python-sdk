@@ -20,6 +20,6 @@ class UrlFetchFramework(object):
         res = urlfetch.fetch(url=url,
                              payload=data,
                              method=method,
-                             deadline=15,
+                             deadline=60,
                              headers=headers)
         return MapiResponse(res.status_code, res.headers, res.content)
