@@ -12,5 +12,6 @@ class RequestsFramework(object):
                                data=data,
                                headers=headers,
                                auth=auth,
+                               timeout=60,
                                files=files)
         return MapiResponse(res.status_code, res.headers, res.content)
