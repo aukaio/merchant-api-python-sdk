@@ -80,8 +80,12 @@ class MapiClient(object):
                                             auth=self.auth)
         if not isinstance(res, MapiResponse):
             res = MapiResponse(*res)
-        if status is None and res.status // 100 != 2:
+        if status is None:
+            if res.status // 100 != 2:
+                raise MapiError(*res)
+        elif res.status != status:
             raise MapiError(*res)
+
         return res
 
     def _depagination_generator(self, url):
@@ -735,9 +739,17 @@ class MapiClient(object):
     def upload_attachment(self, url, mime_type, data):
         data, headers = multipart_encode([MultipartParam('file', value=data, filename='filename', filetype=mime_type)])
         data = "".join(data)
+
         res = self.backend.dispatch_request(method='POST',
                                             url=url,
                                             body=data,
                                             headers=headers,
                                             auth=OpenAuth())
+
+        if not isinstance(res, MapiResponse):
+            res = MapiResponse(*res)
+
+        if res.status // 100 != 2:
+            raise MapiError(*res)
+
         return res
