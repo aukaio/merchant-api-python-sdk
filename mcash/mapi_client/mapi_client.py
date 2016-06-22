@@ -10,7 +10,6 @@ from poster.encode import multipart_encode
 from poster.encode import MultipartParam
 
 
-
 __all__ = ["MapiClient"]
 
 
@@ -32,7 +31,6 @@ class MapiClient(object):
         """
         TODO: we need some explanations of the arguments here
         """
-
         if additional_headers is None:
             additional_headers = {}
 
@@ -122,8 +120,8 @@ class MapiClient(object):
                 Merchant id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/merchant/'
-                           + merchant_id + '/').json()
+                           self.base_url + '/merchant/' +
+                           merchant_id + '/').json()
 
     def get_merchant_lookup(self, lookup_id):
         """Perform a Merchant Lookup.
@@ -132,8 +130,8 @@ class MapiClient(object):
         used by integrators.
         """
         return self.do_req('GET',
-                           self.base_url + '/merchant_lookup/'
-                           + lookup_id + '/').json()
+                           self.base_url + '/merchant_lookup/' +
+                           lookup_id + '/').json()
 
     @validate_input
     def create_user(self, user_id,
@@ -183,8 +181,8 @@ class MapiClient(object):
                      'secret': secret,
                      'pubkey': pubkey}
         return self.do_req('PUT',
-                           self.base_url + '/user/'
-                           + user_id + '/', arguments)
+                           self.base_url + '/user/' +
+                           user_id + '/', arguments)
 
     def get_user(self, user_id):
         """Get user info
@@ -194,8 +192,8 @@ class MapiClient(object):
                 User id of user to update
         """
         return self.do_req('GET',
-                           self.base_url + '/user/'
-                           + user_id + '/').json()
+                           self.base_url + '/user/' +
+                           user_id + '/').json()
 
     @validate_input
     def create_pos(self, name, pos_type,
@@ -244,8 +242,8 @@ class MapiClient(object):
                      'type': pos_type,
                      'location': location}
         return self.do_req('PUT',
-                           self.base_url + '/pos/'
-                           + pos_id + '/', arguments)
+                           self.base_url + '/pos/' +
+                           pos_id + '/', arguments)
 
     def delete_pos(self, pos_id):
         """Delete POS
@@ -255,8 +253,8 @@ class MapiClient(object):
                 POS id as chosen on registration
         """
         return self.do_req('DELETE',
-                           self.base_url + '/pos/'
-                           + pos_id + '/')
+                           self.base_url + '/pos/' +
+                           pos_id + '/')
 
     def get_pos(self, pos_id):
         """Retrieve POS info
@@ -266,15 +264,16 @@ class MapiClient(object):
                 POS id as chosen on registration
         """
         return self.do_req('GET',
-                           self.base_url + '/pos/'
-                           + pos_id + '/').json()
+                           self.base_url + '/pos/' +
+                           pos_id + '/').json()
 
     @validate_input
     def create_payment_request(self, customer, currency, amount, allow_credit,
                                pos_id, pos_tid, action, ledger=None,
                                display_message_uri=None, callback_uri=None,
                                additional_amount=None, additional_edit=None,
-                               text=None, expires_in=None, required_scope=None):
+                               text=None, expires_in=None, required_scope=None,
+                               links=None):
         """Post payment request. The call is idempotent; that is, if one posts
         the same pos_id and pos_tid twice, only one payment request is created.
 
@@ -321,6 +320,11 @@ class MapiClient(object):
                 Expiration in seconds from when server received request
             required_scope:
                 Scopes required to fulfill payment
+            links:
+                A list of links to be shown in app in various states
+                [{"uri": "http://example.com/uri1",
+                  "caption": "This is always shown",
+                  "show_on": ["pending", "fail", "ok"]}]
         """
         arguments = {'customer': customer,
                      'currency': currency,
@@ -339,7 +343,9 @@ class MapiClient(object):
 
         if required_scope:
             arguments['required_scope'] = required_scope
-            
+        if links:
+            arguments['links'] = links
+
         return self.do_req('POST', self.base_url + '/payment_request/',
                            arguments).json()
 
@@ -415,8 +421,8 @@ class MapiClient(object):
 
         arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
-                           self.base_url + '/payment_request/'
-                           + tid + '/', arguments)
+                           self.base_url + '/payment_request/' +
+                           tid + '/', arguments)
 
     def get_payment_request(self, tid):
         """Retrieve payment request info
@@ -426,8 +432,8 @@ class MapiClient(object):
                 Transaction id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/payment_request/'
-                           + tid + '/').json()
+                           self.base_url + '/payment_request/' +
+                           tid + '/').json()
 
     def get_payment_request_outcome(self, tid):
         """Retrieve payment request outcome
@@ -437,8 +443,8 @@ class MapiClient(object):
                 Transaction id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/payment_request/'
-                           + tid + '/outcome/').json()
+                           self.base_url + '/payment_request/' +
+                           tid + '/outcome/').json()
 
     @validate_input
     def update_ticket(self, tid, tickets=None):
@@ -460,8 +466,8 @@ class MapiClient(object):
         """
         arguments = {'tickets': tickets}
         return self.do_req('PUT',
-                           self.base_url + '/payment_request/'
-                           + tid + '/ticket/', arguments)
+                           self.base_url + '/payment_request/' +
+                           tid + '/ticket/', arguments)
 
     @validate_input
     def create_shortlink(self, callback_uri=None,
@@ -507,8 +513,8 @@ class MapiClient(object):
         arguments = {'callback_uri': callback_uri,
                      'description': description}
         return self.do_req('PUT',
-                           self.base_url + '/shortlink/'
-                           + shortlink_id + '/', arguments)
+                           self.base_url + '/shortlink/' +
+                           shortlink_id + '/', arguments)
 
     def delete_shortlink(self, shortlink_id):
         """Delete shortlink
@@ -518,8 +524,8 @@ class MapiClient(object):
                 Shortlink id assigned by mCASH
         """
         return self.do_req('DELETE',
-                           self.base_url + '/shortlink/'
-                           + shortlink_id + '/').json()
+                           self.base_url + '/shortlink/' +
+                           shortlink_id + '/').json()
 
     def get_shortlink(self, shortlink_id_or_url):
         """Retrieve registered shortlink info
@@ -528,8 +534,7 @@ class MapiClient(object):
             shortlink_id_or_url:
                 Shortlink id or url, assigned by mCASH
         """
-
-        if not "://" in shortlink_id_or_url:
+        if "://" not in shortlink_id_or_url:
             shortlink_id_or_url = self.base_url + '/shortlink/' + shortlink_id_or_url + '/'
 
         return self.do_req('GET', shortlink_id_or_url).json()
@@ -560,8 +565,8 @@ class MapiClient(object):
         """
         arguments = {'description': description}
         return self.do_req('PUT',
-                           self.base_url + '/ledger/'
-                           + ledger_id + '/', arguments)
+                           self.base_url + '/ledger/' +
+                           ledger_id + '/', arguments)
 
     def disable_ledger(self, ledger_id):
         """Disable ledger. It will still be used for payments that are
@@ -573,8 +578,8 @@ class MapiClient(object):
                 Ledger id assigned by mCASH
         """
         return self.do_req('DELETE',
-                           self.base_url + '/ledger/'
-                           + ledger_id + '/')
+                           self.base_url + '/ledger/' +
+                           ledger_id + '/')
 
     def get_ledger(self, ledger_id):
         """Get ledger info
@@ -584,8 +589,8 @@ class MapiClient(object):
                 Ledger id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/ledger/'
-                           + ledger_id + '/').json()
+                           self.base_url + '/ledger/' +
+                           ledger_id + '/').json()
 
     def get_all_reports(self, ledger_id):
         """List reports on given ledger
@@ -594,8 +599,8 @@ class MapiClient(object):
             ledger_id:
                 Ledger id assigned by mCASH
         """
-        return self._depaginate_all(self.base_url + '/ledger/'
-                                    + ledger_id + '/report/')
+        return self._depaginate_all(self.base_url + '/ledger/' +
+                                    ledger_id + '/report/')
 
     @validate_input
     def close_report(self, ledger_id, report_id, callback_uri=None):
@@ -623,9 +628,9 @@ class MapiClient(object):
         """
         arguments = {'callback_uri': callback_uri}
         return self.do_req('PUT',
-                           self.base_url + '/ledger/'
-                           + ledger_id + '/report/'
-                           + report_id + '/', arguments)
+                           self.base_url + '/ledger/' +
+                           ledger_id + '/report/' +
+                           report_id + '/', arguments)
 
     def get_report(self, ledger_id, report_id):
         """Get report info
@@ -637,9 +642,9 @@ class MapiClient(object):
                 Report id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/ledger/'
-                           + ledger_id + '/report/'
-                           + report_id + '/').json()
+                           self.base_url + '/ledger/' +
+                           ledger_id + '/report/' +
+                           report_id + '/').json()
 
     def get_last_settlement(self):
         """This endpoint redirects to the last Settlement
@@ -669,8 +674,8 @@ class MapiClient(object):
                 The ID of the settlement to retrieve.
         """
         return self.do_req('GET',
-                           self.base_url + '/settlement/'
-                           + settlement_id + '/').json()
+                           self.base_url + '/settlement/' +
+                           settlement_id + '/').json()
 
     @validate_input
     def create_permission_request(self, customer, pos_id, pos_tid, scope,
@@ -701,8 +706,8 @@ class MapiClient(object):
                 Permission request id assigned my mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/permission_request/'
-                           + rid + '/').json()
+                           self.base_url + '/permission_request/' +
+                           rid + '/').json()
 
     def get_permission_request_outcome(self, rid):
         """See outcome of permission request
@@ -712,8 +717,8 @@ class MapiClient(object):
                 Permission request id assigned my mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/permission_request/'
-                           + rid + '/outcome/').json()
+                           self.base_url + '/permission_request/' +
+                           rid + '/outcome/').json()
 
     def get_all_status_codes(self):
         """Get all status codes
@@ -724,8 +729,8 @@ class MapiClient(object):
         """Get status code
         """
         return self.do_req('GET',
-                           self.base_url + '/status_code/'
-                           + value + '/').json()
+                           self.base_url + '/status_code/' +
+                           value + '/').json()
 
     def upload_receipt(self, url, data):
         """Upload a receipt to the give url

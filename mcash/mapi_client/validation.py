@@ -1,6 +1,7 @@
 from functools import wraps
 from voluptuous import Schema, Required, Any, All, Length, Range
 
+
 def validate_input(function):
     """Decorator that validates the kwargs of the function passed to it."""
     @wraps(function)
@@ -70,6 +71,7 @@ create_payment_request_validator = Schema({
     'text': basestring,
     Required('action'): Any('auth', 'sale', 'AUTH', 'SALE'),
     Required('expires_in'): All(int, Range(min=0, max=2592000)),
+    'links': [{'uri': basestring, 'caption': basestring, 'show_on': [Any('pending', 'fail', 'ok')]}]
 })
 
 update_payment_request_validator = Schema({
