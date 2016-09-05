@@ -71,7 +71,20 @@ create_payment_request_validator = Schema({
     'text': basestring,
     Required('action'): Any('auth', 'sale', 'AUTH', 'SALE'),
     Required('expires_in'): All(int, Range(min=0, max=2592000)),
-    'links': [{'uri': basestring, 'caption': basestring, 'show_on': [Any('pending', 'fail', 'ok')]}]
+    'links': [{'uri': basestring, 'caption': basestring, 'show_on': [Any('pending', 'fail', 'ok')]}],
+    'line_items': [{
+        Required('product_id'): basestring,
+        Required('vat'): basestring,
+        'description': basestring,
+        Required('vat_rate'): basestring,
+        Required('total'): basestring,
+        'tags': [{
+            Required('tag_id'): basestring,
+            'label': basestring,
+            }],
+        Required('item_cost'): basestring,
+        Required('quantity'): basestring,
+        }]
 })
 
 update_payment_request_validator = Schema({
@@ -88,6 +101,19 @@ update_payment_request_validator = Schema({
     'text': basestring,
     'action': Any('reauth', 'capture', 'abort', 'release', 'refund',
                   'REAUTH', 'CAPTURE', 'ABORT', 'RELEASE', 'REFUND'),
+    'line_items': [{
+        Required('product_id'): basestring,
+        Required('vat'): basestring,
+        'description': basestring,
+        Required('vat_rate'): basestring,
+        Required('total'): basestring,
+        'tags': [{
+            Required('tag_id'): basestring,
+            'label': basestring,
+            }],
+        Required('item_cost'): basestring,
+        Required('quantity'): basestring,
+        }]
 })
 
 update_ticket_validator = Schema({

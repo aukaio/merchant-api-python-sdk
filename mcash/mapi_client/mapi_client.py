@@ -273,7 +273,7 @@ class MapiClient(object):
                                display_message_uri=None, callback_uri=None,
                                additional_amount=None, additional_edit=None,
                                text=None, expires_in=None, required_scope=None,
-                               links=None):
+                               links=None, line_items=None):
         """Post payment request. The call is idempotent; that is, if one posts
         the same pos_id and pos_tid twice, only one payment request is created.
 
@@ -325,6 +325,11 @@ class MapiClient(object):
                 [{"uri": "http://example.com/uri1",
                   "caption": "This is always shown",
                   "show_on": ["pending", "fail", "ok"]}]
+            line_items:
+                A list of product lines in the payment request. Each item should
+                contain product_id, vat, description (optional), vat_rate, total,
+                item_cost, quantity and optionally tags, which is a list of tag
+                dicts containing tag_id and optionally label.
         """
         arguments = {'customer': customer,
                      'currency': currency,
@@ -346,6 +351,9 @@ class MapiClient(object):
         if links:
             arguments['links'] = links
 
+        if line_items:
+            arguments['line_items'] = line_items
+
         return self.do_req('POST', self.base_url + '/payment_request/',
                            arguments).json()
 
@@ -354,7 +362,7 @@ class MapiClient(object):
                                action=None, ledger=None, callback_uri=None,
                                display_message_uri=None, capture_id=None,
                                additional_amount=None, text=None, refund_id=None,
-                               required_scope=None):
+                               required_scope=None, line_items=None):
         """Update payment request, reauthorize, capture, release or abort
 
         It is possible to update ledger and the callback URIs for a payment
@@ -404,6 +412,9 @@ class MapiClient(object):
                 Action to perform.
             required_scope:
                 Scopes required to fulfill payment
+            line_items:
+                An updated line_items. Will fail if line_items
+                already set in the payment request.
         """
         arguments = {'ledger': ledger,
                      'display_message_uri': display_message_uri,
@@ -418,6 +429,10 @@ class MapiClient(object):
 
         if required_scope:
             arguments['required_scope'] = required_scope
+
+        if line_items:
+            arguments['line_items'] = line_items
+
 
         arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
