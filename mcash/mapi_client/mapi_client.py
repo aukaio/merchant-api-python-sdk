@@ -273,7 +273,7 @@ class MapiClient(object):
                                display_message_uri=None, callback_uri=None,
                                additional_amount=None, additional_edit=None,
                                text=None, expires_in=None, required_scope=None,
-                               links=None, line_items=None):
+                               required_scope_text=None, links=None, line_items=None):
         """Post payment request. The call is idempotent; that is, if one posts
         the same pos_id and pos_tid twice, only one payment request is created.
 
@@ -320,6 +320,8 @@ class MapiClient(object):
                 Expiration in seconds from when server received request
             required_scope:
                 Scopes required to fulfill payment
+            required_scope_text:
+                Text that is shown to user when asked for permission.
             links:
                 A list of links to be shown in app in various states
                 [{"uri": "http://example.com/uri1",
@@ -354,6 +356,7 @@ class MapiClient(object):
 
         if required_scope:
             arguments['required_scope'] = required_scope
+            arguments['required_scope_text'] = required_scope_text
         if links:
             arguments['links'] = links
 
@@ -368,7 +371,7 @@ class MapiClient(object):
                                action=None, ledger=None, callback_uri=None,
                                display_message_uri=None, capture_id=None,
                                additional_amount=None, text=None, refund_id=None,
-                               required_scope=None, line_items=None):
+                               required_scope=None, required_scope_text=None, line_items=None):
         """Update payment request, reauthorize, capture, release or abort
 
         It is possible to update ledger and the callback URIs for a payment
@@ -422,6 +425,8 @@ class MapiClient(object):
                 An updated line_items. Will fail if line_items
                 already set in the payment request or if the sum of the totals
                 is different from the original amount.
+            required_scope_text:
+                Text that is shown to user when asked for permission.
         """
         arguments = {'ledger': ledger,
                      'display_message_uri': display_message_uri,
@@ -436,6 +441,7 @@ class MapiClient(object):
 
         if required_scope:
             arguments['required_scope'] = required_scope
+            arguments['required_scope_text'] = required_scope_text
 
         if line_items:
             arguments['line_items'] = line_items
