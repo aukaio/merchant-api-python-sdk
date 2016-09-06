@@ -74,13 +74,13 @@ create_payment_request_validator = Schema({
     'links': [{'uri': basestring, 'caption': basestring, 'show_on': [Any('pending', 'fail', 'ok')]}],
     'line_items': [{
         Required('product_id'): basestring,
-        Required('vat'): basestring,
+        'vat': basestring,
         'description': basestring,
-        Required('vat_rate'): basestring,
+        'vat_rate': basestring,
         Required('total'): basestring,
         'tags': [{
             Required('tag_id'): basestring,
-            'label': basestring,
+            Required('label'): basestring,
             }],
         Required('item_cost'): basestring,
         Required('quantity'): basestring,

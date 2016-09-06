@@ -329,7 +329,13 @@ class MapiClient(object):
                 A list of product lines in the payment request. Each item should
                 contain product_id, vat, description (optional), vat_rate, total,
                 item_cost, quantity and optionally tags, which is a list of tag
-                dicts containing tag_id and optionally label.
+                dicts containing tag_id and label. The sum of all
+                line item totals must be equal to the amount argument.
+                [{"product_id": "product-1", vat: "0.50",
+                description: "An optional description", vat_rate: "0.25",
+                total: "5.00", item_cost: "2.50", quantity: "2", "tags": [
+                    {"tag_id": "product-info-5", "label": "Some product info"}
+                ]}]
         """
         arguments = {'customer': customer,
                      'currency': currency,
@@ -414,7 +420,8 @@ class MapiClient(object):
                 Scopes required to fulfill payment
             line_items:
                 An updated line_items. Will fail if line_items
-                already set in the payment request.
+                already set in the payment request or if the sum of the totals
+                is different from the original amount.
         """
         arguments = {'ledger': ledger,
                      'display_message_uri': display_message_uri,
