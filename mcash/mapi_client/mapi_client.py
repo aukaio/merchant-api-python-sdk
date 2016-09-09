@@ -360,8 +360,7 @@ class MapiClient(object):
         if links:
             arguments['links'] = links
 
-        if line_items:
-            arguments['line_items'] = line_items
+        arguments['line_items'] = line_items
 
         return self.do_req('POST', self.base_url + '/payment_request/',
                            arguments).json()
@@ -443,8 +442,7 @@ class MapiClient(object):
             arguments['required_scope'] = required_scope
             arguments['required_scope_text'] = required_scope_text
 
-        if line_items:
-            arguments['line_items'] = line_items
+        arguments['line_items'] = line_items
 
 
         arguments = {k: v for k, v in arguments.items() if v is not None}
