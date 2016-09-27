@@ -76,6 +76,7 @@ create_payment_request_validator = Schema({
     'line_items': Any([{
         Required('product_id'): basestring,
         'vat': basestring,
+        'metadata': Any([{'key': basestring, 'value': basestring}], None),
         'description': basestring,
         'vat_rate': basestring,
         Required('total'): basestring,
@@ -106,6 +107,7 @@ update_payment_request_validator = Schema({
     'line_items': Any([{
         Required('product_id'): basestring,
         'vat': basestring,
+        'metadata': Any([{'key': basestring, 'value': basestring}], None),
         'description': basestring,
         'vat_rate': basestring,
         Required('total'): basestring,
