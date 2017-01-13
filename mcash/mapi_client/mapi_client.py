@@ -38,6 +38,7 @@ class MapiClient(object):
         self.auth = auth
         self.logger = logger or logging.getLogger(__name__)
         self.base_url = base_url
+        self.merchant_api_base_url = base_url + '/merchant/v1'
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
         if (mcash_user and mcash_integrator) or (not mcash_user and not mcash_integrator):
@@ -120,7 +121,7 @@ class MapiClient(object):
                 Merchant id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/merchant/' +
+                           self.merchant_api_base_url + '/merchant/' +
                            merchant_id + '/').json()
 
     def get_merchant_lookup(self, lookup_id):
@@ -130,7 +131,7 @@ class MapiClient(object):
         used by integrators.
         """
         return self.do_req('GET',
-                           self.base_url + '/merchant_lookup/' +
+                           self.merchant_api_base_url + '/merchant_lookup/' +
                            lookup_id + '/').json()
 
     @validate_input
@@ -156,7 +157,7 @@ class MapiClient(object):
                      'netmask': netmask,
                      'secret': secret,
                      'pubkey': pubkey}
-        return self.do_req('POST', self.base_url + '/user/', arguments).json()
+        return self.do_req('POST', self.merchant_api_base_url + '/user/', arguments).json()
 
     @validate_input
     def update_user(self, user_id,
@@ -181,7 +182,7 @@ class MapiClient(object):
                      'secret': secret,
                      'pubkey': pubkey}
         return self.do_req('PUT',
-                           self.base_url + '/user/' +
+                           self.merchant_api_base_url + '/user/' +
                            user_id + '/', arguments)
 
     def get_user(self, user_id):
@@ -192,7 +193,7 @@ class MapiClient(object):
                 User id of user to update
         """
         return self.do_req('GET',
-                           self.base_url + '/user/' +
+                           self.merchant_api_base_url + '/user/' +
                            user_id + '/').json()
 
     @validate_input
@@ -216,12 +217,12 @@ class MapiClient(object):
                      'type': pos_type,
                      'id': pos_id,
                      'location': location}
-        return self.do_req('POST', self.base_url + '/pos/', arguments).json()
+        return self.do_req('POST', self.merchant_api_base_url + '/pos/', arguments).json()
 
     def get_all_pos(self):
         """List all Point of Sales for merchant
         """
-        return self._depaginate_all(self.base_url + '/pos/')
+        return self._depaginate_all(self.merchant_api_base_url + '/pos/')
 
     @validate_input
     def update_pos(self, pos_id, name, pos_type, location=None):
@@ -242,7 +243,7 @@ class MapiClient(object):
                      'type': pos_type,
                      'location': location}
         return self.do_req('PUT',
-                           self.base_url + '/pos/' +
+                           self.merchant_api_base_url + '/pos/' +
                            pos_id + '/', arguments)
 
     def delete_pos(self, pos_id):
@@ -253,7 +254,7 @@ class MapiClient(object):
                 POS id as chosen on registration
         """
         return self.do_req('DELETE',
-                           self.base_url + '/pos/' +
+                           self.merchant_api_base_url + '/pos/' +
                            pos_id + '/')
 
     def get_pos(self, pos_id):
@@ -264,7 +265,7 @@ class MapiClient(object):
                 POS id as chosen on registration
         """
         return self.do_req('GET',
-                           self.base_url + '/pos/' +
+                           self.merchant_api_base_url + '/pos/' +
                            pos_id + '/').json()
 
     @validate_input
@@ -363,7 +364,7 @@ class MapiClient(object):
         if line_items:
             arguments['line_items'] = line_items
 
-        return self.do_req('POST', self.base_url + '/payment_request/',
+        return self.do_req('POST', self.merchant_api_base_url + '/payment_request/',
                            arguments).json()
 
     @validate_input
@@ -449,7 +450,7 @@ class MapiClient(object):
 
         arguments = {k: v for k, v in arguments.items() if v is not None}
         return self.do_req('PUT',
-                           self.base_url + '/payment_request/' +
+                           self.merchant_api_base_url + '/payment_request/' +
                            tid + '/', arguments)
 
     def get_payment_request(self, tid):
@@ -460,7 +461,7 @@ class MapiClient(object):
                 Transaction id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/payment_request/' +
+                           self.merchant_api_base_url + '/payment_request/' +
                            tid + '/').json()
 
     def get_payment_request_outcome(self, tid):
@@ -471,8 +472,20 @@ class MapiClient(object):
                 Transaction id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/payment_request/' +
+                           self.merchant_api_base_url + '/payment_request/' +
                            tid + '/outcome/').json()
+
+    def post_chat_message(self, merchant_id, channel_id, message):
+        """post a chat message
+
+        Arguments:
+            channel_id:
+                Scan token
+        """
+
+        return self.do_req('POST',
+                           self.base_url + '/chat/v1/merchant/%s/channel/%s/message/' % (merchant_id, channel_id),
+                           message)
 
     @validate_input
     def update_ticket(self, tid, tickets=None):
@@ -494,7 +507,7 @@ class MapiClient(object):
         """
         arguments = {'tickets': tickets}
         return self.do_req('PUT',
-                           self.base_url + '/payment_request/' +
+                           self.merchant_api_base_url + '/payment_request/' +
                            tid + '/ticket/', arguments)
 
     @validate_input
@@ -514,20 +527,20 @@ class MapiClient(object):
         arguments = {'callback_uri': callback_uri,
                      'description': description,
                      'serial_number': serial_number}
-        return self.do_req('POST', self.base_url + '/shortlink/',
+        return self.do_req('POST', self.merchant_api_base_url + '/shortlink/',
                            arguments).json()
 
     def get_shortlink_generator(self):
         """List shortlink registrations
         """
-        depaginator = self._depagination_generator(self.base_url +
+        depaginator = self._depagination_generator(self.merchant_api_base_url +
                                                    '/shortlink/')
         return depaginator
 
     def get_all_shortlinks(self):
         """List shortlink registrations
         """
-        return self._depaginate_all(self.base_url + '/shortlink/')
+        return self._depaginate_all(self.merchant_api_base_url + '/shortlink/')
 
     @validate_input
     def update_shortlink(self, shortlink_id, callback_uri=None,
@@ -541,7 +554,7 @@ class MapiClient(object):
         arguments = {'callback_uri': callback_uri,
                      'description': description}
         return self.do_req('PUT',
-                           self.base_url + '/shortlink/' +
+                           self.merchant_api_base_url + '/shortlink/' +
                            shortlink_id + '/', arguments)
 
     def delete_shortlink(self, shortlink_id):
@@ -552,7 +565,7 @@ class MapiClient(object):
                 Shortlink id assigned by mCASH
         """
         return self.do_req('DELETE',
-                           self.base_url + '/shortlink/' +
+                           self.merchant_api_base_url + '/shortlink/' +
                            shortlink_id + '/').json()
 
     def get_shortlink(self, shortlink_id_or_url):
@@ -563,7 +576,7 @@ class MapiClient(object):
                 Shortlink id or url, assigned by mCASH
         """
         if "://" not in shortlink_id_or_url:
-            shortlink_id_or_url = self.base_url + '/shortlink/' + shortlink_id_or_url + '/'
+            shortlink_id_or_url = self.merchant_api_base_url + '/shortlink/' + shortlink_id_or_url + '/'
 
         return self.do_req('GET', shortlink_id_or_url).json()
 
@@ -574,12 +587,12 @@ class MapiClient(object):
         arguments = {'currency': currency,
                      'description': description}
         return self.do_req('POST',
-                           self.base_url + '/ledger/', arguments).json()
+                           self.merchant_api_base_url + '/ledger/', arguments).json()
 
     def get_all_ledgers(self):
         """List available ledgers
         """
-        return self._depaginate_all(self.base_url + '/ledger/')
+        return self._depaginate_all(self.merchant_api_base_url + '/ledger/')
 
     @validate_input
     def update_ledger(self, ledger_id, description=None):
@@ -593,7 +606,7 @@ class MapiClient(object):
         """
         arguments = {'description': description}
         return self.do_req('PUT',
-                           self.base_url + '/ledger/' +
+                           self.merchant_api_base_url + '/ledger/' +
                            ledger_id + '/', arguments)
 
     def disable_ledger(self, ledger_id):
@@ -606,7 +619,7 @@ class MapiClient(object):
                 Ledger id assigned by mCASH
         """
         return self.do_req('DELETE',
-                           self.base_url + '/ledger/' +
+                           self.merchant_api_base_url + '/ledger/' +
                            ledger_id + '/')
 
     def get_ledger(self, ledger_id):
@@ -617,7 +630,7 @@ class MapiClient(object):
                 Ledger id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/ledger/' +
+                           self.merchant_api_base_url + '/ledger/' +
                            ledger_id + '/').json()
 
     def get_all_reports(self, ledger_id):
@@ -627,7 +640,7 @@ class MapiClient(object):
             ledger_id:
                 Ledger id assigned by mCASH
         """
-        return self._depaginate_all(self.base_url + '/ledger/' +
+        return self._depaginate_all(self.merchant_api_base_url + '/ledger/' +
                                     ledger_id + '/report/')
 
     @validate_input
@@ -656,7 +669,7 @@ class MapiClient(object):
         """
         arguments = {'callback_uri': callback_uri}
         return self.do_req('PUT',
-                           self.base_url + '/ledger/' +
+                           self.merchant_api_base_url + '/ledger/' +
                            ledger_id + '/report/' +
                            report_id + '/', arguments)
 
@@ -670,7 +683,7 @@ class MapiClient(object):
                 Report id assigned by mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/ledger/' +
+                           self.merchant_api_base_url + '/ledger/' +
                            ledger_id + '/report/' +
                            report_id + '/').json()
 
@@ -682,12 +695,12 @@ class MapiClient(object):
 
         Redirect latest Settlement
         """
-        return self.do_req('GET', self.base_url + '/last_settlement/').json()
+        return self.do_req('GET', self.merchant_api_base_url + '/last_settlement/').json()
 
     def get_all_settlements(self):
         """List settlements
         """
-        return self._depaginate_all(self.base_url + '/settlement/')
+        return self._depaginate_all(self.merchant_api_base_url + '/settlement/')
 
     def get_settlement(self, settlement_id):
         """Retrieve information regarding one settlement. The settlement
@@ -702,7 +715,7 @@ class MapiClient(object):
                 The ID of the settlement to retrieve.
         """
         return self.do_req('GET',
-                           self.base_url + '/settlement/' +
+                           self.merchant_api_base_url + '/settlement/' +
                            settlement_id + '/').json()
 
     @validate_input
@@ -723,7 +736,7 @@ class MapiClient(object):
                      'callback_uri': callback_uri,
                      'expires_in': expires_in}
         return self.do_req('POST',
-                           self.base_url + '/permission_request/',
+                           self.merchant_api_base_url + '/permission_request/',
                            arguments).json()
 
     def get_permission_request(self, rid):
@@ -734,7 +747,7 @@ class MapiClient(object):
                 Permission request id assigned my mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/permission_request/' +
+                           self.merchant_api_base_url + '/permission_request/' +
                            rid + '/').json()
 
     def get_permission_request_outcome(self, rid):
@@ -745,19 +758,19 @@ class MapiClient(object):
                 Permission request id assigned my mCASH
         """
         return self.do_req('GET',
-                           self.base_url + '/permission_request/' +
+                           self.merchant_api_base_url + '/permission_request/' +
                            rid + '/outcome/').json()
 
     def get_all_status_codes(self):
         """Get all status codes
         """
-        return self._depaginate_all(self.base_url + '/status_code/')
+        return self._depaginate_all(self.merchant_api_base_url + '/status_code/')
 
     def get_status_code(self, value):
         """Get status code
         """
         return self.do_req('GET',
-                           self.base_url + '/status_code/' +
+                           self.merchant_api_base_url + '/status_code/' +
                            value + '/').json()
 
     def upload_receipt(self, url, data):
