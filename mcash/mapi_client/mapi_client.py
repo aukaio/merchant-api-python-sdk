@@ -37,6 +37,7 @@ class MapiClient(object):
         self.backend = RequestsFramework()
         self.auth = auth
         self.logger = logger or logging.getLogger(__name__)
+        base_url = base_url.replace('/merchant/v1', '')
         self.base_url = base_url
         self.merchant_api_base_url = base_url + '/merchant/v1'
         # save the merchant_id, we will use it for some callback values
