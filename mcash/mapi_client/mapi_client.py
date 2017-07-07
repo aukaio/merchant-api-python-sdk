@@ -512,21 +512,17 @@ class MapiClient(object):
                            tid + '/ticket/', arguments)
 
     @validate_input
-    def create_shortlink(self, callback_uri=None,
-                         description=None, serial_number=None):
+    def create_shortlink(self, callback_uri=None, serial_number=None):
         """Register new shortlink
 
         Arguments:
             callback_uri:
                 URI called by mCASH when user scans shortlink
-            description:
-                Shortlink description displayed in confirmation dialogs
             serial_number:
                 Serial number on printed QR codes. This field is only used when
                 registering printed stickers issued by mCASH
         """
         arguments = {'callback_uri': callback_uri,
-                     'description': description,
                      'serial_number': serial_number}
         return self.do_req('POST', self.merchant_api_base_url + '/shortlink/',
                            arguments).json()
@@ -544,16 +540,14 @@ class MapiClient(object):
         return self._depaginate_all(self.merchant_api_base_url + '/shortlink/')
 
     @validate_input
-    def update_shortlink(self, shortlink_id, callback_uri=None,
-                         description=None):
+    def update_shortlink(self, shortlink_id, callback_uri=None):
         """Update existing shortlink registration
 
         Arguments:
             shortlink_id:
                 Shortlink id assigned by mCASH
         """
-        arguments = {'callback_uri': callback_uri,
-                     'description': description}
+        arguments = {'callback_uri': callback_uri}
         return self.do_req('PUT',
                            self.merchant_api_base_url + '/shortlink/' +
                            shortlink_id + '/', arguments)
