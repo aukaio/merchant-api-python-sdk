@@ -42,7 +42,6 @@ create_pos_validator = Schema({
 
 create_shortlink_validator = Schema({
     'callback_uri': basestring,
-    'description': basestring,
     'serial_number': basestring
 })
 
@@ -127,8 +126,7 @@ update_ticket_validator = Schema({
 
 update_shortlink_validator = Schema({
     Required('shortlink_id'): basestring,
-    'callback_uri': basestring,
-    'description': basestring
+    'callback_uri': basestring
 })
 
 create_ledger_validator = Schema({

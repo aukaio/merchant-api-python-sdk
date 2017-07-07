@@ -136,8 +136,7 @@ def test_update_ticket():
 
 def test_create_shortlink():
     return mapiclient.create_shortlink(
-        callback_uri="pusher:m-testmerchant-testchannel",
-        description="swagsterlink")
+        callback_uri="pusher:m-testmerchant-testchannel")
 
 
 def test_get_shortlink():
