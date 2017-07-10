@@ -9,7 +9,7 @@ setup(
     author="mCASH Norge AS",
     author_email="sm@mcash.no",
     license="MIT",
-    url="https://github.com/mcash/merchant-api-python-sdk",
+    url="https://github.com/aukaio/merchant-api-python-sdk",
     install_requires=["pycrypto>=2.6",
                       "requests>=2.2.1",
                       "voluptuous>=0.8.4",
