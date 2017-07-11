@@ -47,33 +47,6 @@ def rsa_auth_merchant_simple_test(
         r = s.send(s.prepare_request(req))
         print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
 
-    print "checking if we have a ledger"
-    req = requests.Request("GET",
-                           url_base + '/merchant/v1/ledger/',
-                           headers=headers
-                           )
-    r = s.send(s.prepare_request(req))
-    print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
-    if len(r.json()[u'uris']) == 1:  # only default ledger exist
-        print "creating a ledger..."
-        payload = {
-            "currency": "NOK",
-            "description": "Ledger for Kasse 1"
-        }
-        req = requests.Request("POST",
-                               url_base + '/merchant/v1/ledger/',
-                               data=json.dumps(payload),
-                               headers=headers
-                               )
-        r = s.send(s.prepare_request(req))
-        print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
-        ledger_id = r.json()['id']
-    else:
-        uri = r.json()['uris'][0]
-        ledger_id = uri.split('/')[-2]  # get ledger_id
-
-    print "using ledger_id =", ledger_id
-
     print "requesting auth for a payment..."
     pos_tid = random.randint(0, sys.maxsize)
     payload = {
@@ -86,7 +59,6 @@ def rsa_auth_merchant_simple_test(
         "additional_amount": "0",
         "additional_edit": False,
         "allow_credit": False,
-        "ledger": ledger_id,
         "expires_in": 21600,
         "text":
         "Thanks for your business here at Acme Inc! \nYour payment is being processed.",
@@ -134,7 +106,6 @@ def rsa_auth_merchant_simple_test(
     print "Merchant capturing payment..."
     payload = {
         "action": "capture",
-        "ledger": ledger_id,
         "display_message_uri": "https://www.acmeinc.com/pos/3/display/",
         "callback_uri": "https://www.acmeinc.com/pos/3/payment/h93d458qo4685/"
     }
@@ -144,31 +115,6 @@ def rsa_auth_merchant_simple_test(
                            data=json.dumps(payload),
                            headers=headers
                            )
-    r = s.send(s.prepare_request(req))
-    print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
-    assert r.status_code == 204, "Expected r.status_code to be 204"
-
-    print "getting current open report..."
-    print "ledger_id = ", ledger_id
-    req = requests.Request("GET",
-                           url_base +
-                           '/merchant/v1/ledger/{ledger_id}/'.format(ledger_id=ledger_id),
-                           headers=headers)
-    r = s.send(s.prepare_request(req))
-    print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
-    assert r.status_code == 200, "Expected r.status_code to be 200, actually is %i = %s" % (
-        r.status_code, httplib.responses[r.status_code])
-    open_report_uri = r.json()['open_report_uri']
-    print open_report_uri
-
-    print "closing report..."
-    payload = {"callback_uri":
-               "https://www.amalgamatedwidget.com/pos/1/callback/"}
-
-    req = requests.Request("PUT",
-                           open_report_uri,
-                           data=json.dumps(payload),
-                           headers=headers)
     r = s.send(s.prepare_request(req))
     print "r.status_code =", r.status_code, " ", httplib.responses[r.status_code]
     assert r.status_code == 204, "Expected r.status_code to be 204"
