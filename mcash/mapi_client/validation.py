@@ -55,7 +55,6 @@ update_pos_validator = Schema({
 })
 
 create_payment_request_validator = Schema({
-    'ledger': basestring,
     'display_message_uri': basestring,
     'callback_uri': basestring,
     Required('customer'): All(basestring, Length(max=100)),
@@ -90,7 +89,6 @@ create_payment_request_validator = Schema({
 
 update_payment_request_validator = Schema({
     'tid': basestring,
-    'ledger': basestring,
     'display_message_uri': basestring,
     'callback_uri': basestring,
     'currency': All(basestring, Length(min=3, max=3)),
@@ -129,24 +127,7 @@ update_shortlink_validator = Schema({
     'callback_uri': basestring
 })
 
-create_ledger_validator = Schema({
-    Required('currency'): basestring,
-    'description': basestring
-})
-
-update_ledger_validator = Schema({
-    Required('ledger_id'): basestring,
-    'description': basestring
-})
-
-close_report_validator = Schema({
-    Required('ledger_id'): basestring,
-    Required('report_id'): basestring,
-    'callback_uri': basestring,
-})
-
 create_permission_request_validator = Schema({
-    'ledger': basestring,
     Required('customer'): All(basestring, Length(max=100)),
     Required('pos_id'): basestring,
     Required('pos_tid'): basestring,

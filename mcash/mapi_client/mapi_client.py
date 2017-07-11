@@ -271,8 +271,8 @@ class MapiClient(object):
 
     @validate_input
     def create_payment_request(self, customer, currency, amount, allow_credit,
-                               pos_id, pos_tid, action, ledger=None,
-                               display_message_uri=None, callback_uri=None,
+                               pos_id, pos_tid, action, display_message_uri=None,
+                               callback_uri=None,
                                additional_amount=None, additional_edit=None,
                                text=None, expires_in=None, required_scope=None,
                                required_scope_text=None, links=None, line_items=None):
@@ -280,9 +280,6 @@ class MapiClient(object):
         the same pos_id and pos_tid twice, only one payment request is created.
 
         Arguments:
-            ledger:
-                Log entries will be added to the open report on the specified
-                ledger
             display_message_uri:
                 Messages that can be used to inform the POS operator about the
                 progress of the payment request will be POSTed to this URI if
@@ -348,7 +345,6 @@ class MapiClient(object):
                      'pos_id': pos_id,
                      'pos_tid': pos_tid,
                      'action': action,
-                     'ledger': ledger,
                      'display_message_uri': display_message_uri,
                      'callback_uri': callback_uri,
                      'additional_amount': additional_amount,
@@ -370,15 +366,14 @@ class MapiClient(object):
 
     @validate_input
     def update_payment_request(self, tid, currency=None, amount=None,
-                               action=None, ledger=None, callback_uri=None,
+                               action=None, callback_uri=None,
                                display_message_uri=None, capture_id=None,
                                additional_amount=None, text=None, refund_id=None,
                                required_scope=None, required_scope_text=None, line_items=None):
         """Update payment request, reauthorize, capture, release or abort
 
-        It is possible to update ledger and the callback URIs for a payment
-        request. Changes are always appended to the open report of a ledger,
-        and notifications are sent to the callback registered at the time of
+        It is possible to update callback URIs for a payment request.
+        Notifications are sent to the callback registered at the time of
         notification.
 
         Capturing an authorized payment or reauthorizing is done with the
@@ -391,9 +386,6 @@ class MapiClient(object):
         capture is performed.
 
         Arguments:
-            ledger:
-                Log entries will be added to the open report on the specified
-                ledger
             display_message_uri:
                 Messages that can be used to inform the POS operator about the
                 progress of the payment request will be POSTed to this URI if
@@ -430,8 +422,7 @@ class MapiClient(object):
             required_scope_text:
                 Text that is shown to user when asked for permission.
         """
-        arguments = {'ledger': ledger,
-                     'display_message_uri': display_message_uri,
+        arguments = {'display_message_uri': display_message_uri,
                      'callback_uri': callback_uri,
                      'currency': currency,
                      'amount': amount,
@@ -575,113 +566,6 @@ class MapiClient(object):
 
         return self.do_req('GET', shortlink_id_or_url).json()
 
-    @validate_input
-    def create_ledger(self, currency, description=None):
-        """Create a ledger
-        """
-        arguments = {'currency': currency,
-                     'description': description}
-        return self.do_req('POST',
-                           self.merchant_api_base_url + '/ledger/', arguments).json()
-
-    def get_all_ledgers(self):
-        """List available ledgers
-        """
-        return self._depaginate_all(self.merchant_api_base_url + '/ledger/')
-
-    @validate_input
-    def update_ledger(self, ledger_id, description=None):
-        """Update ledger info
-
-        Arguments:
-            ledger_id:
-                Ledger id assigned by mCASH
-            description:
-                Description of the Ledger and it's usage
-        """
-        arguments = {'description': description}
-        return self.do_req('PUT',
-                           self.merchant_api_base_url + '/ledger/' +
-                           ledger_id + '/', arguments)
-
-    def disable_ledger(self, ledger_id):
-        """Disable ledger. It will still be used for payments that are
-        currently in progress, but it will not be possible to create new
-        payments with the ledger.
-
-        Arguments:
-            ledger_id:
-                Ledger id assigned by mCASH
-        """
-        return self.do_req('DELETE',
-                           self.merchant_api_base_url + '/ledger/' +
-                           ledger_id + '/')
-
-    def get_ledger(self, ledger_id):
-        """Get ledger info
-
-        Arguments:
-            ledger_id:
-                Ledger id assigned by mCASH
-        """
-        return self.do_req('GET',
-                           self.merchant_api_base_url + '/ledger/' +
-                           ledger_id + '/').json()
-
-    def get_all_reports(self, ledger_id):
-        """List reports on given ledger
-
-        Arguments:
-            ledger_id:
-                Ledger id assigned by mCASH
-        """
-        return self._depaginate_all(self.merchant_api_base_url + '/ledger/' +
-                                    ledger_id + '/report/')
-
-    @validate_input
-    def close_report(self, ledger_id, report_id, callback_uri=None):
-        u"""Close Report
-
-        When you PUT to a report, it will start the process of closing it. When
-        the closing process is complete (i.e. when report.status == 'closed')
-        mCASH does a POST call to callback_uri, if provided. This call will
-        contain JSON data similar to when GETing the Report.
-
-        Closing a report automatically open a new one.
-
-        The contents of a GET
-        /merchant/v1/ledger/<ledger_id>/report/<report_id>/ is included in
-        callback if callback is a secure URI, otherwise the link itself is sent
-        in callback.
-
-        Arguments:
-            ledger_id:
-                Id for ledger for report
-            report_id:
-                Report id assigned by mCASH
-            callback_uri:
-                Callback URI to be called when Report has finished closing.
-        """
-        arguments = {'callback_uri': callback_uri}
-        return self.do_req('PUT',
-                           self.merchant_api_base_url + '/ledger/' +
-                           ledger_id + '/report/' +
-                           report_id + '/', arguments)
-
-    def get_report(self, ledger_id, report_id):
-        """Get report info
-
-        Arguments:
-            ledger_id:
-                Id for ledger for report
-            report_id:
-                Report id assigned by mCASH
-        """
-        return self.do_req('GET',
-                           self.merchant_api_base_url + '/ledger/' +
-                           ledger_id + '/report/' +
-                           report_id + '/').json()
-
     def get_last_settlement(self):
         """This endpoint redirects to the last Settlement
 
@@ -715,7 +599,7 @@ class MapiClient(object):
 
     @validate_input
     def create_permission_request(self, customer, pos_id, pos_tid, scope,
-                                  ledger=None, text=None, callback_uri=None,
+                                  text=None, callback_uri=None,
                                   expires_in=None):
         """Create permission request
 
@@ -726,7 +610,6 @@ class MapiClient(object):
                      'pos_id': pos_id,
                      'pos_tid': pos_tid,
                      'scope': scope,
-                     'ledger': ledger,
                      'text': text,
                      'callback_uri': callback_uri,
                      'expires_in': expires_in}
