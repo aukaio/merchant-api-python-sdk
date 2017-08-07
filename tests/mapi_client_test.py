@@ -114,7 +114,6 @@ def test_create_payment_request():
         pos_tid="uniqueid",
         action="auth",
         expires_in=3600,
-        # ledger='testledger',
         display_message_uri="http://example.com/examplemessage",
         callback_uri="pusher:m-testchannel",
         additional_amount=21.00,
@@ -144,48 +143,12 @@ def test_get_shortlink():
     mapiclient.get_shortlink(_id)
 
 
-def test_create_ledger():
-    global lid
-    lid = str(mapiclient.create_ledger(currency='NOK')['id'])
-
-
-def test_get_all_ledgers():
-    mapiclient.get_all_ledgers()
-
-
-def test_update_ledger():
-    mapiclient.update_ledger(ledger_id=lid)
-
-
-def test_get_ledger():
-    mapiclient.get_ledger(ledger_id=lid)
-
-
-def test_get_all_reports():
-    return mapiclient.get_all_reports(ledger_id=lid)
-
-
 def test_update_payment_request():
     mapiclient.update_payment_request(
         tid=prid,
         action="abort",
-        ledger=lid,
         callback_uri="pusher:m-testchannel",
         display_message_uri="http://example.com/examplemessage")
-
-# def test_get_report():
-#     pass
-
-
-# def test_close_report():
-#     all_reports = test_get_all_reports()
-#     import pprint
-#     pprint.pprint(all_reports)
-#     _rid = str(test_get_all_reports()[0]['id'])
-#     mapiclient.close_report(
-#         ledger_id=lid,
-#         report_id=_rid,
-#         callback_uri="pusher:m-testmerchant-testchannel")
 
 
 def test_get_last_settlement():
@@ -247,7 +210,3 @@ def test_get_permission_request_outcome():
         code = e.response.status_code
         assert code == 409
     mapiclient.get_permission_request_outcome(_id)
-
-
-def test_disable_ledger():
-    mapiclient.disable_ledger(ledger_id=lid)
