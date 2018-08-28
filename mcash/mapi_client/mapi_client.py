@@ -1,5 +1,5 @@
 import json
-from auth import OpenAuth
+from auth import OpenAuth, SecretAuth
 from validation import validate_input
 import logging
 from mapi_response import MapiResponse
@@ -42,8 +42,10 @@ class MapiClient(object):
         self.merchant_api_base_url = base_url + '/merchant/v1'
         # save the merchant_id, we will use it for some callback values
         self.mcash_merchant = mcash_merchant
-        if (mcash_user and mcash_integrator) or (not mcash_user and not mcash_integrator):
-            raise ValueError("either mcash_user or mcash_integrator should be set")
+        # if instance is SecretAuth, it's not necessary to have a mcash_user or mcash_integrator
+        if not isinstance(self.auth, SecretAuth):
+            if (mcash_user and mcash_integrator) or (not mcash_user and not mcash_integrator):
+                raise ValueError("either mcash_user or mcash_integrator should be set")
         self.mcash_user = mcash_user
         self.mcash_integrator = mcash_integrator
         self.default_headers = self._default_headers.copy()
@@ -136,7 +138,7 @@ class MapiClient(object):
                            lookup_id + '/').json()
 
     @validate_input
-    def create_user(self, user_id,
+    def create_user(self, user_id, mid,
                     roles=None, netmask=None,
                     secret=None, pubkey=None):
         u"""Create user for the Merchant given in the X-Mcash-Merchant header.
@@ -154,6 +156,7 @@ class MapiClient(object):
                 RSA key used for authenticating by signing
         """
         arguments = {'id': user_id,
+                     'mid': mid,
                      'roles': roles,
                      'netmask': netmask,
                      'secret': secret,
@@ -677,3 +680,66 @@ class MapiClient(object):
             raise MapiError(*res)
 
         return res
+
+    def create_merchant_ssp_user(self, email):
+        arguments = {'email': email}
+        return self.do_req(
+            'POST',
+            self.merchant_api_base_url + '/merchant_ssp_user/',
+            arguments
+        ).json()
+
+    def get_merchant_ssp_user(self, merchant_ssp_user_id):
+        return self.do_req(
+            'GET',
+            self.merchant_api_base_url + '/merchant_ssp_user/' + merchant_ssp_user_id + '/'
+        ).json()
+
+    def create_legal_entity(self, signee):
+        arguments = {'signee': signee}
+        return self.do_req(
+            'POST',
+            self.merchant_api_base_url + '/legal_entity/',
+            arguments
+        ).json()
+
+    def update_legal_entity(self, legal_entity_id, **data):
+        arguments = {
+            'organization_id': data.get('organization_id'),
+            'business_name': data.get('business_name'),
+            'ownership_structure': data.get('ownership_structure'),
+            'beneficial_owners': data.get('beneficial_owners'),
+            'vat_registered': data.get('vat_registered'),
+        }
+        return self.do_req(
+            'PUT',
+            self.merchant_api_base_url + '/legal_entity/' + legal_entity_id + '/',
+            arguments
+        ).json()
+
+    def get_legal_entity(self, legal_entity_id):
+        return self.do_req(
+            'GET',
+            self.merchant_api_base_url + '/legal_entity/' + legal_entity_id + '/'
+        ).json()
+
+    def create_merchant(self, legal_entity_id, integration_type, business_name):
+        arguments = {
+            'legal_entity': legal_entity_id,
+            'integration_type': integration_type,
+            'business_name': business_name,
+        }
+        return self.do_req(
+            'POST',
+            self.merchant_api_base_url + '/merchant/',
+            arguments
+        ).json()
+
+    def update_merchant(self, merchant_id, data):
+        arguments = data
+        self.do_req(
+            'PUT',
+            self.merchant_api_base_url + '/merchant/' + merchant_id + '/',
+            arguments
+        )
+        return

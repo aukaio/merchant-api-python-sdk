@@ -17,6 +17,7 @@ def validate_input(function):
 
 create_user_validator = Schema({
     Required('user_id'): basestring,
+    'mid': basestring,
     'roles': [Any('user', 'superuser')],
     'netmask': basestring,
     'secret': All(basestring, Length(min=8, max=64)),
