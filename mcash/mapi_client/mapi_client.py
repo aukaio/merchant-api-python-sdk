@@ -156,12 +156,12 @@ class MapiClient(object):
                 RSA key used for authenticating by signing
         """
         arguments = {'id': user_id,
-                     'mid': mid,
                      'roles': roles,
                      'netmask': netmask,
                      'secret': secret,
                      'pubkey': pubkey}
-        return self.do_req('POST', self.merchant_api_base_url + '/user/', arguments).json()
+        headers = {'X-Mcash-Merchant': mid}
+        return self.do_req('POST', self.merchant_api_base_url + '/user/', arguments, headers=headers).json()
 
     @validate_input
     def update_user(self, user_id,
