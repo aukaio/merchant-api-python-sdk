@@ -138,7 +138,7 @@ class MapiClient(object):
                            lookup_id + '/').json()
 
     @validate_input
-    def create_user(self, user_id, mid,
+    def create_user(self, user_id,
                     roles=None, netmask=None,
                     secret=None, pubkey=None):
         u"""Create user for the Merchant given in the X-Mcash-Merchant header.
@@ -160,8 +160,7 @@ class MapiClient(object):
                      'netmask': netmask,
                      'secret': secret,
                      'pubkey': pubkey}
-        headers = {'X-Mcash-Merchant': mid}
-        return self.do_req('POST', self.merchant_api_base_url + '/user/', arguments, headers=headers).json()
+        return self.do_req('POST', self.merchant_api_base_url + '/user/', arguments).json()
 
     @validate_input
     def update_user(self, user_id,
