@@ -21,5 +21,6 @@ class UrlFetchFramework(object):
                              payload=data,
                              method=method,
                              deadline=60,
+                             follow_redirects=False,
                              headers=headers)
         return MapiResponse(res.status_code, res.headers, res.content)
