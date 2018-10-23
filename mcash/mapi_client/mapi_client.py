@@ -1,4 +1,6 @@
 import json
+import urllib
+
 from auth import OpenAuth, SecretAuth
 from validation import validate_input
 import logging
@@ -458,21 +460,13 @@ class MapiClient(object):
                            self.merchant_api_base_url + '/payment_request/' +
                            tid + '/').json()
 
-    def list_payment_requests(self, query_string):
+    def list_payment_requests(self, **kwargs):
         """
-                Retrieve list of payment requests
-                Arguments:
-                    query_string:
-                        Parameters to filter the list of payment requests.
-                        May include:
-                            created_from - date
-                            created_to - date
-                            non_empty_only - bool
+        Retrieve list of payment requests
+        """
 
-                """
         return self.do_req('GET',
-                           self.merchant_api_base_url + '/payment_request/' + query_string
-                           ).json()
+                           self.merchant_api_base_url + '/payment_request/?', urllib.urlencode(kwargs)).json()
 
     def get_payment_request_outcome(self, tid):
         """Retrieve payment request outcome
@@ -594,22 +588,12 @@ class MapiClient(object):
         """
         return self.do_req('GET', self.merchant_api_base_url + '/last_settlement/').json()
 
-    def list_settlements(self, query_string):
+    def list_settlements(self, **kwargs):
         """
         List settlements
-        Arguments:
-            query_string:
-                Parameters to filter the list of payment requests.
-                May include:
-                    created_from - date
-                    created_to - date
-                    only_ok - bool (only requests with status OK or AUTH)
-                    page_size - int
-                    cursor - Cursor pointing where to start
-
         """
         return self.do_req('GET',
-                           self.merchant_api_base_url + '/settlements/' + query_string
+                           self.merchant_api_base_url + '/settlements/?' + urllib.urlencode(kwargs)
                            ).json()
 
     def get_settlement(self, settlement_id):
