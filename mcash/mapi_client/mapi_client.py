@@ -458,6 +458,22 @@ class MapiClient(object):
                            self.merchant_api_base_url + '/payment_request/' +
                            tid + '/').json()
 
+    def list_payment_requests(self, query_string):
+        """
+                Retrieve list of payment requests
+                Arguments:
+                    query_string:
+                        Parameters to filter the list of payment requests.
+                        May include:
+                            created_from - date
+                            created_to - date
+                            non_empty_only - bool
+
+                """
+        return self.do_req('GET',
+                           self.merchant_api_base_url + '/payment_request/' + query_string
+                           ).json()
+
     def get_payment_request_outcome(self, tid):
         """Retrieve payment request outcome
 
@@ -578,10 +594,23 @@ class MapiClient(object):
         """
         return self.do_req('GET', self.merchant_api_base_url + '/last_settlement/').json()
 
-    def get_all_settlements(self):
-        """List settlements
+    def list_settlements(self, query_string):
         """
-        return self._depaginate_all(self.merchant_api_base_url + '/settlement/')
+        List settlements
+        Arguments:
+            query_string:
+                Parameters to filter the list of payment requests.
+                May include:
+                    created_from - date
+                    created_to - date
+                    only_ok - bool (only requests with status OK or AUTH)
+                    page_size - int
+                    cursor - Cursor pointing where to start
+
+        """
+        return self.do_req('GET',
+                           self.merchant_api_base_url + '/settlements/' + query_string
+                           ).json()
 
     def get_settlement(self, settlement_id):
         """Retrieve information regarding one settlement. The settlement
