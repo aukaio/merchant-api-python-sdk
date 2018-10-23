@@ -466,7 +466,7 @@ class MapiClient(object):
         """
 
         return self.do_req('GET',
-                           self.merchant_api_base_url + '/payment_request/?', urllib.urlencode(kwargs)).json()
+                           self.merchant_api_base_url + '/payment_request/?' + urllib.urlencode(kwargs)).json()
 
     def get_payment_request_outcome(self, tid):
         """Retrieve payment request outcome
