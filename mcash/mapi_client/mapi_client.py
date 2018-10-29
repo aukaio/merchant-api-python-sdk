@@ -612,6 +612,14 @@ class MapiClient(object):
                            self.merchant_api_base_url + '/settlement/' +
                            settlement_id + '/').json()
 
+    def get_settlement_account(self, settlement_account_id):
+        """
+        Retrieve SettlementAccount
+        """
+        return self.do_req('GET',
+                           '%s/settlement_account/%s/' % (self.merchant_api_base_url, settlement_account_id)
+                           ).json()
+
     @validate_input
     def create_permission_request(self, customer, pos_id, pos_tid, scope,
                                   text=None, callback_uri=None,
