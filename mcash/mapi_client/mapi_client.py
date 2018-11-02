@@ -590,10 +590,10 @@ class MapiClient(object):
 
     def list_settlements(self, **kwargs):
         """
-        List settlements
+        List settlements with a summary for a settlement report or file export
         """
         return self.do_req('GET',
-                           self.merchant_api_base_url + '/settlements/?' + urllib.urlencode(kwargs)
+                           self.merchant_api_base_url + '/settlement_report/?' + urllib.urlencode(kwargs)
                            ).json()
 
     def get_settlement(self, settlement_id):
