@@ -1,7 +1,7 @@
 -e git://github.com/ekulyk/PythonPusherClient.git@6560fe52debf75a162844fa3ac87fa857f5312fa#egg=pusherclient-dev
 pycrypto==2.6.1
 requests==2.2.1
-voluptuous==0.8.4
+voluptuous==0.11.5
 websocket-client==0.12.0
 wsgiref==0.1.2
 poster==0.8.1

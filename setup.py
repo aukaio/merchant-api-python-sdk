@@ -12,7 +12,7 @@ setup(
     url="https://github.com/aukaio/merchant-api-python-sdk",
     install_requires=["pycrypto>=2.6",
                       "requests>=2.2.1",
-                      "voluptuous>=0.8.4",
+                      "voluptuous>=0.11.5",
                       "poster>=0.8.1",
                       "wsgiref>=0.1.2"],
     extras_require={
