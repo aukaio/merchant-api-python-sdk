@@ -1,5 +1,5 @@
 from functools import wraps
-from voluptuous import Schema, Required, Any, All, Length, Range
+from voluptuous import Schema, Required, Any, All, Length, Maybe, Range
 
 
 def validate_input(function):
@@ -14,6 +14,7 @@ def validate_input(function):
             raise Exception("Could not find validation schema for the"
                             " function " + function.__name__)
     return wrapper
+
 
 create_user_validator = Schema({
     Required('user_id'): basestring,
@@ -43,7 +44,7 @@ create_pos_validator = Schema({
 
 create_shortlink_validator = Schema({
     'callback_uri': basestring,
-    'serial_number': basestring
+    'serial_number': Maybe(basestring)
 })
 
 update_pos_validator = Schema({
