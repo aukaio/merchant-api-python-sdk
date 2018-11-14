@@ -201,6 +201,15 @@ class MapiClient(object):
                            self.merchant_api_base_url + '/user/' +
                            user_id + '/').json()
 
+    def delete_user(self, user_id):
+        """
+        Delete user (api key)
+        """
+        return self.do_req(
+            'DELETE',
+            '%s/user/%s/' % (self.merchant_api_base_url, user_id)
+        )
+
     @validate_input
     def create_pos(self, name, pos_type,
                    pos_id, location=None):
@@ -562,9 +571,10 @@ class MapiClient(object):
             shortlink_id:
                 Shortlink id assigned by mCASH
         """
-        return self.do_req('DELETE',
-                           self.merchant_api_base_url + '/shortlink/' +
-                           shortlink_id + '/').json()
+        return self.do_req(
+            'DELETE',
+            '%s/shortlink/%s/' % (self.merchant_api_base_url, shortlink_id)
+        )
 
     def get_shortlink(self, shortlink_id_or_url):
         """Retrieve registered shortlink info
@@ -735,7 +745,7 @@ class MapiClient(object):
             'PUT',
             self.merchant_api_base_url + '/legal_entity/' + legal_entity_id + '/',
             arguments
-        ).json()
+        )
 
     def get_legal_entity(self, legal_entity_id):
         return self.do_req(
@@ -756,10 +766,14 @@ class MapiClient(object):
         ).json()
 
     def update_merchant(self, merchant_id, data):
-        arguments = data
-        self.do_req(
+        return self.do_req(
             'PUT',
             self.merchant_api_base_url + '/merchant/' + merchant_id + '/',
-            arguments
+            data
         )
-        return
+
+    def delete_merchant(self, merchant_id):
+        return self.do_req(
+            'DELETE',
+            '%s/merchant/%s/' % (self.merchant_api_base_url, merchant_id)
+        )
