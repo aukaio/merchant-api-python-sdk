@@ -725,6 +725,12 @@ class MapiClient(object):
             self.merchant_api_base_url + '/merchant_ssp_user/' + merchant_ssp_user_id + '/'
         ).json()
 
+    def delete_merchant_ssp_user(self, merchant_ssp_user_id):
+        return self.do_req(
+            'DELETE',
+            '%s/merchant_ssp_user/%s' % (self.merchant_api_base_url, merchant_ssp_user_id)
+        )
+
     def create_legal_entity(self, signee):
         arguments = {'signee': signee}
         return self.do_req(
@@ -752,6 +758,12 @@ class MapiClient(object):
             'GET',
             self.merchant_api_base_url + '/legal_entity/' + legal_entity_id + '/'
         ).json()
+
+    def delete_legal_entity(self, legal_entity_id):
+        return self.do_req(
+            'DELETE',
+            '%s/legal_entity/%s/' % (self.merchant_api_base_url, legal_entity_id)
+        )
 
     def create_merchant(self, legal_entity_id, integration_type, business_name):
         arguments = {
