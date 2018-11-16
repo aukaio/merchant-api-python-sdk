@@ -765,16 +765,11 @@ class MapiClient(object):
             '%s/legal_entity/%s/' % (self.merchant_api_base_url, legal_entity_id)
         )
 
-    def create_merchant(self, legal_entity_id, integration_type, business_name):
-        arguments = {
-            'legal_entity': legal_entity_id,
-            'integration_type': integration_type,
-            'business_name': business_name,
-        }
+    def create_merchant(self, data):
         return self.do_req(
             'POST',
             self.merchant_api_base_url + '/merchant/',
-            arguments
+            data
         ).json()
 
     def update_merchant(self, merchant_id, data):
