@@ -728,7 +728,7 @@ class MapiClient(object):
     def delete_merchant_ssp_user(self, merchant_ssp_user_id):
         return self.do_req(
             'DELETE',
-            '%s/merchant_ssp_user/%s' % (self.merchant_api_base_url, merchant_ssp_user_id)
+            '%s/merchant_ssp_user/%s/' % (self.merchant_api_base_url, merchant_ssp_user_id)
         )
 
     def create_legal_entity(self, signee, jurisdiction):
