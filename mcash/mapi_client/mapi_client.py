@@ -711,8 +711,16 @@ class MapiClient(object):
 
         return res
 
-    def create_merchant_ssp_user(self, email):
-        arguments = {'email': email}
+    def create_merchant_ssp_user(self, email, first_name, last_name, phone=None):
+        arguments = {
+            'email': email,
+            'name': {
+                'first_name': first_name,
+                'middle_name': '',
+                'family_name': last_name
+            },
+            'phone': phone
+        }
         return self.do_req(
             'POST',
             self.merchant_api_base_url + '/merchant_ssp_user/',
