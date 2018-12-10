@@ -784,3 +784,9 @@ class MapiClient(object):
             'DELETE',
             '%s/merchant/%s/' % (self.merchant_api_base_url, merchant_id)
         )
+
+    def sales_summary(self, **query_string):
+        return self.do_req(
+            'GET',
+            '/sales_summary/?%s' % urllib.urlencode(query_string)
+        ).json()
