@@ -792,5 +792,5 @@ class MapiClient(object):
     def sales_summary(self, **query_string):
         return self.do_req(
             'GET',
-            '/sales_summary/?%s' % urllib.urlencode(query_string)
+            '%s/sales_summary/?%s' % (self.merchant_api_base_url, urllib.urlencode(query_string))
         ).json()
